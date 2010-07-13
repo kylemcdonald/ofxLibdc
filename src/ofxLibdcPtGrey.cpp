@@ -9,19 +9,21 @@
  http://www.ptgrey.com/support/downloads/documents/TAN2005002_Output_strobe_signal_pulse.pdf
  */
 void ofxLibdcPtGrey::setupAlternatingStrobe() {	
+	// put GPIO 0 and 1 in dcam output mode
+	dc1394_set_control_register(camera, PTGREY_GPIO_CTRL_PIN_0, 0x80080000);
+	dc1394_set_control_register(camera, PTGREY_GPIO_CTRL_PIN_1, 0x80080000);
+	
 	// put GPIO 0 and 1 in output mode
 	dc1394_set_control_register(camera, PTGREY_PIO_DIRECTION, 0xc0000000);
 	
 	// set GPIO 0 and 1 delay to 0, and duration to the integration (shutter) time
+	// 0x82000000 means LOW polarity (short to ground while capturing)
+	// 0x83000000 means HIGH polarity (short to ground, unless capturing)
 	dc1394_set_control_register(camera, PTGREY_STROBE_0_CNT, 0x82000000);
 	dc1394_set_control_register(camera, PTGREY_STROBE_1_CNT, 0x82000000);
 	
 	// set strobe to a period of 2 frames
 	dc1394_set_control_register(camera, PTGREY_GPIO_STRPAT_CTRL, 0x80000200);
-	
-	// put GPIO 0 and 1 in strobe mode
-	dc1394_set_control_register(camera, PTGREY_GPIO_CTRL_PIN_0, 0x80030003);
-	dc1394_set_control_register(camera, PTGREY_GPIO_CTRL_PIN_1, 0x80030003);
 	
 	// set GPIO 0 and 1 patterns to (1,0) and (0,1) respectively
 	dc1394_set_control_register(camera, PTGREY_GPIO_STRPAT_MASK_PIN_0, 0x8000bfff);
