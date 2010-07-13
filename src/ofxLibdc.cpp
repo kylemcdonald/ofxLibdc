@@ -269,10 +269,10 @@ void ofxLibdc::setFeature(dc1394feature_t feature, unsigned int value) {
 
 void ofxLibdc::setFeatureNorm(dc1394feature_t feature, float value) {
 	unsigned int min, max;
-	getFeatureRange(feature, &min, &max);	
+	getFeatureRange(feature, &min, &max);
 	dc1394_feature_set_power(camera, feature, DC1394_ON);
 	dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
-	dc1394_feature_set_value(camera, feature, (unsigned int) (value * (max - min) + min));
+	dc1394_feature_set_value(camera, feature, value * (max - min) + min);
 }
 
 void ofxLibdc::getBrightnessRange(unsigned int* min, unsigned int* max) const {

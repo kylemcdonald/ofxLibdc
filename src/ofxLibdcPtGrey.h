@@ -52,9 +52,9 @@ public:
 	void clearEmbeddedInfo();
 	void setEmbeddedInfo(int embeddedInfo, bool enable = true);
 	
-	unsigned int getEmbeddedInfo(ofImage& img, int embeddedInfo) const;
-	void getEmbeddedPosition(ofImage& img, unsigned short* left, unsigned short* top) const;
-	unsigned int getEmbeddedStrobeCounter(ofImage& img) const;
+	unsigned int getEmbeddedInfo(unsigned char* pixels, int embeddedInfo) const;
+	void getEmbeddedPosition(unsigned char* pixels, unsigned short* left, unsigned short* top) const;
+	unsigned int getEmbeddedStrobeCounter(unsigned char* pixels) const;
 	
 	void setMaxFramerate();
 protected:

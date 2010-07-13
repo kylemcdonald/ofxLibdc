@@ -64,21 +64,20 @@ unsigned int ofxLibdcPtGrey::getEmbeddedInfoOffset(int embeddedInfo) const {
 	return total;
 }
 
-unsigned int ofxLibdcPtGrey::getEmbeddedInfo(ofImage& img, int embeddedInfo) const {
+unsigned int ofxLibdcPtGrey::getEmbeddedInfo(unsigned char* pixels, int embeddedInfo) const {
 	unsigned int offset = getEmbeddedInfoOffset(embeddedInfo);
-	unsigned char* pixels = img.getPixels();
 	return ((unsigned int*) pixels)[offset];
 }
 
-void ofxLibdcPtGrey::getEmbeddedPosition(ofImage& img, unsigned short* left, unsigned short* top) const {
-	unsigned int value = getEmbeddedInfo(img, PTGREY_EMBED_ROI);
+void ofxLibdcPtGrey::getEmbeddedPosition(unsigned char* pixels, unsigned short* left, unsigned short* top) const {
+	unsigned int value = getEmbeddedInfo(pixels, PTGREY_EMBED_ROI);
 	unsigned char* pv = (unsigned char*) &value;
 	*left = ((unsigned short) pv[0] << 8) | pv[1];
 	*top = ((unsigned short) pv[2] << 8) | pv[3];
 }
 
-unsigned int ofxLibdcPtGrey::getEmbeddedStrobeCounter(ofImage& img) const {
-	unsigned int value = getEmbeddedInfo(img, PTGREY_EMBED_STROBE_PATTERN);
+unsigned int ofxLibdcPtGrey::getEmbeddedStrobeCounter(unsigned char* pixels) const {
+	unsigned int value = getEmbeddedInfo(pixels, PTGREY_EMBED_STROBE_PATTERN);
 	unsigned char* pv = (unsigned char*) &value;
 	return (unsigned int) (pv[3] & 0x0f);
 }
