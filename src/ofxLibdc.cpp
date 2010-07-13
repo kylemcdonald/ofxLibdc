@@ -299,6 +299,59 @@ void ofxLibdc::getFeatureRange(dc1394feature_t feature, unsigned int* min, unsig
 	dc1394_feature_get_boundaries(camera, feature, min, max);	
 }
 
+unsigned int ofxLibdc::getBrightness() {
+	return getFeature(DC1394_FEATURE_BRIGHTNESS);
+}
+
+unsigned int ofxLibdc::getGamma() {
+	return getFeature(DC1394_FEATURE_GAMMA);
+}
+
+unsigned int ofxLibdc::getGain() {
+	return getFeature(DC1394_FEATURE_GAIN);
+}
+
+unsigned int ofxLibdc::getExposure() {
+	return getFeature(DC1394_FEATURE_EXPOSURE);
+}
+
+unsigned int ofxLibdc::getShutter() {
+	return getFeature(DC1394_FEATURE_SHUTTER);
+}
+
+unsigned int ofxLibdc::getFeature(dc1394feature_t feature) {
+	unsigned int value;
+	dc1394_feature_get_value(camera, feature, &value);
+	return value;
+}
+
+float ofxLibdc::getBrightnessNorm() {
+	return getFeatureNorm(DC1394_FEATURE_BRIGHTNESS);
+}
+
+float ofxLibdc::getGammaNorm() {
+	return getFeatureNorm(DC1394_FEATURE_GAMMA);
+}
+
+float ofxLibdc::getGainNorm() {
+	return getFeatureNorm(DC1394_FEATURE_GAIN);
+}
+
+float ofxLibdc::getExposureNorm() {
+	return getFeatureNorm(DC1394_FEATURE_EXPOSURE);
+}
+
+float ofxLibdc::getShutterNorm() {
+	return getFeatureNorm(DC1394_FEATURE_SHUTTER);
+}
+
+float ofxLibdc::getFeatureNorm(dc1394feature_t feature) {
+	unsigned int value = getFeature(feature);
+	unsigned int min, max;
+	getFeatureRange(feature, &min, &max);
+	return ((float) value - min) / (max - min);
+}
+
 float ofxLibdc::getShutterAbs() const {
 	return getFeatureAbs(DC1394_FEATURE_SHUTTER);
 }

@@ -57,7 +57,7 @@ public:
 	void setShutter(unsigned int shutter);
 	void setFeature(dc1394feature_t feature, unsigned int value);
 	
-	void setBrightnessNorm(float gamma);
+	void setBrightnessNorm(float brightness);
 	void setGammaNorm(float gamma);
 	void setGainNorm(float gain);
 	void setExposureNorm(float exposure);
@@ -70,6 +70,20 @@ public:
 	void getExposureRange(unsigned int* min, unsigned int* max) const;
 	void getShutterRange(unsigned int* min, unsigned int* max) const;
 	void getFeatureRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const;
+	
+	unsigned int getBrightness();
+	unsigned int getGamma();
+	unsigned int getGain();
+	unsigned int getExposure();
+	unsigned int getShutter();
+	unsigned int getFeature(dc1394feature_t feature);
+	
+	float getBrightnessNorm();
+	float getGammaNorm();
+	float getGainNorm();
+	float getExposureNorm();
+	float getShutterNorm();
+	float getFeatureNorm(dc1394feature_t feature);
 	
 	float getShutterAbs() const;
 	float getFeatureAbs(dc1394feature_t feature) const;
