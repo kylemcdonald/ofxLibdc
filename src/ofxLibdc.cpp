@@ -5,7 +5,7 @@ int ofxLibdc::libdcCameras = 0;
 
 ofxLibdc::ofxLibdc() :
 		camera(NULL),
-		imageType(OF_IMAGE_COLOR),
+		imageType(OF_IMAGE_GRAYSCALE),
 		useFormat7(false),
 		use1394b(false),
 		width(640),
@@ -403,7 +403,10 @@ void ofxLibdc::grabStill(ofImage& img) {
 
 bool ofxLibdc::grabVideo(ofImage& img, bool dropFrames) {
 	setTransmit(true);
-	img.allocate(width, height, imageType);
+	// don't trust allocate() to be smart
+	if(img.getWidth() != width || img.getHeight() != height) {
+		img.allocate(width, height, imageType);
+	}
 	if(dropFrames) {
 		bool remaining;
 		int i = 0;

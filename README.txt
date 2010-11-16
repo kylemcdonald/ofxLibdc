@@ -7,14 +7,27 @@ It avoids unnecessary threading by using libdc1394's non-blocking image grabbing
 
 Instead of copying the image to an internal buffer before giving it to you, ofxLibdc will fill the image you pass to it. This avoids unnecessary copying.
 
-Grabbing with ofxLibdc looks like:
+A minimal example of grabbing with ofxLibdc looks like:
 
-ofLibdc camera;
-ofImage currentFrame;
-if(camera.grabVideo(currentFrame)) {
-	// do something with currentFrame
+#include "ofxLibdc.h"
+class testApp : public ofBaseApp {
+public:
+	ofxLibdc camera;
+	ofImage curFrame;
+	void setup() {
+		camera.setup();
+	}
+	void update() {
+		if(camera.grabVideo(curFrame))
+			curFrame.update();
+	}
+	void draw() {
+		curFrame.draw(0, 0);
+	}
 }
 
 Because there is no separate capture thread, there is no overhead from copying images you don't need.
 
 ofxLibdc can dynamically change a number of parameters. setPosition() can be used to change the ROI position without restarting the camera. Other changes can be made, but will cause slight delays. Format 7 can be switched on and off, or between modes, 1394b can be switched on and off, and the ROI can be resized.
+
+ofxLibdc is currently only compatible with grayscale cameras.
