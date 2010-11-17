@@ -64,9 +64,9 @@ dc1394color_coding_t ofxLibdc::getLibdcType(int ofImageType) {
 
 int ofxLibdc::getCameraCount() {
 	dc1394camera_list_t* list;
-	dc1394_camera_enumerate (libdcContext, &list);
+	dc1394_camera_enumerate(libdcContext, &list);
 	int cameraCount = list->num;
-	dc1394_camera_free_list (list);
+	dc1394_camera_free_list(list);
 	return cameraCount;
 }
 
@@ -103,25 +103,24 @@ void ofxLibdc::setPosition(unsigned int left, unsigned int top) {
 	}
 }
 
-void ofxLibdc::setup(int cameraNumber) {
-	initCamera(cameraNumber);
-	applySettings();
+bool ofxLibdc::setup(int cameraNumber) {
+	return initCamera(cameraNumber) && applySettings();
 }
 
-void ofxLibdc::initCamera(int cameraNumber) {
+bool ofxLibdc::initCamera(int cameraNumber) {
 	// create camera struct
 	dc1394camera_list_t* list;
 	dc1394_camera_enumerate(libdcContext, &list);
 	if(list->num == 0) {
 		ofLog(OF_LOG_ERROR, "No cameras found.");
-		return;
+		return false;
 	}
 	camera = dc1394_camera_new(libdcContext, list->ids[cameraNumber].guid);
 	if (!camera) {
 		stringstream error;
 		error << "Failed to initialize camera " << cameraNumber << " with guid " << list->ids[cameraNumber].guid;
 		ofLog(OF_LOG_ERROR, error.str());
-		return;
+		return false;
 	} else {
 		stringstream msg;
 		msg << "Using camera with GUID " << camera->guid;
@@ -138,9 +137,11 @@ void ofxLibdc::initCamera(int cameraNumber) {
 	#ifdef TARGET_LINUX
 	dc1394_reset_bus(camera);
 	#endif
+	
+	return true;
 }
 
-void ofxLibdc::applySettings() {
+bool ofxLibdc::applySettings() {
 	if(camera)
 		dc1394_capture_stop(camera);
 		
@@ -174,7 +175,7 @@ void ofxLibdc::applySettings() {
 			}
 			if(i == video_modes.num - 1) {
 				ofLog(OF_LOG_ERROR, "Camera does not support target mode.");
-				return;
+				return false;
 			}
 		}
 		
@@ -199,26 +200,34 @@ void ofxLibdc::applySettings() {
 	dc1394_video_set_mode(camera, videoMode);
 		
 	dc1394_capture_setup(camera, OFXLIBDC_BUFFER_SIZE, DC1394_CAPTURE_FLAGS_DEFAULT);
+	
+	return true;
 }
 
 void ofxLibdc::quantizePosition() {
-	unsigned int hunit, vunit;
-	dc1394_format7_get_unit_position(camera, videoMode, &hunit, &vunit);
-	left = (left / hunit) * hunit;
-	top = (top / vunit) * vunit;
+	if(camera) {
+		unsigned int hunit, vunit;
+		dc1394_format7_get_unit_position(camera, videoMode, &hunit, &vunit);
+		left = (left / hunit) * hunit;
+		top = (top / vunit) * vunit;
+	}
 }
 
 void ofxLibdc::quantizeSize() {
-	unsigned int hunit, vunit;
-	dc1394_format7_get_unit_size(camera, videoMode, &hunit, &vunit);
-	width = (width / hunit) * hunit;
-	height = (height / vunit) * vunit;
+	if(camera) {
+		unsigned int hunit, vunit;
+		dc1394_format7_get_unit_size(camera, videoMode, &hunit, &vunit);
+		width = (width / hunit) * hunit;
+		height = (height / vunit) * vunit;
+	}
 }
 
 void ofxLibdc::printFeatures() const {
 	dc1394featureset_t features;
-	dc1394_feature_get_all(camera, &features);
-	dc1394_feature_print_all(&features, stdout);
+	if(camera) {
+		dc1394_feature_get_all(camera, &features);
+		dc1394_feature_print_all(&features, stdout);
+	}
 }
 
 void ofxLibdc::setBrightness(unsigned int brightness) {
@@ -261,18 +270,22 @@ void ofxLibdc::setShutterNorm(float shutter) {
 	setFeatureNorm(DC1394_FEATURE_SHUTTER, shutter);
 }
 
-void ofxLibdc::setFeature(dc1394feature_t feature, unsigned int value) {
-	dc1394_feature_set_power(camera, feature, DC1394_ON);
-	dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
-	dc1394_feature_set_value(camera, feature, value);
+inline void ofxLibdc::setFeature(dc1394feature_t feature, unsigned int value) {
+	if(camera) {
+		dc1394_feature_set_power(camera, feature, DC1394_ON);
+		dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
+		dc1394_feature_set_value(camera, feature, value);
+	}
 }
 
 void ofxLibdc::setFeatureNorm(dc1394feature_t feature, float value) {
-	unsigned int min, max;
-	getFeatureRange(feature, &min, &max);
-	dc1394_feature_set_power(camera, feature, DC1394_ON);
-	dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
-	dc1394_feature_set_value(camera, feature, value * (max - min) + min);
+	if(camera) {
+		unsigned int min, max;
+		getFeatureRange(feature, &min, &max);
+		dc1394_feature_set_power(camera, feature, DC1394_ON);
+		dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
+		dc1394_feature_set_value(camera, feature, value * (max - min) + min);
+	}
 }
 
 void ofxLibdc::getBrightnessRange(unsigned int* min, unsigned int* max) const {
@@ -296,7 +309,9 @@ void ofxLibdc::getShutterRange(unsigned int* min, unsigned int* max) const {
 }
 
 void ofxLibdc::getFeatureRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const {
-	dc1394_feature_get_boundaries(camera, feature, min, max);	
+	if(camera) {
+		dc1394_feature_get_boundaries(camera, feature, min, max);
+	}
 }
 
 unsigned int ofxLibdc::getBrightness() {
@@ -320,8 +335,10 @@ unsigned int ofxLibdc::getShutter() {
 }
 
 unsigned int ofxLibdc::getFeature(dc1394feature_t feature) {
-	unsigned int value;
-	dc1394_feature_get_value(camera, feature, &value);
+	unsigned int value = 0;
+	if(camera) {
+		dc1394_feature_get_value(camera, feature, &value);
+	}
 	return value;
 }
 
@@ -357,8 +374,10 @@ float ofxLibdc::getShutterAbs() const {
 }
 
 float ofxLibdc::getFeatureAbs(dc1394feature_t feature) const {
-	float value;
-	dc1394_feature_get_absolute_value(camera, feature, &value);
+	float value = 0;
+	if(camera) {
+		dc1394_feature_get_absolute_value(camera, feature, &value);
+	}
 	return value;
 }
 
@@ -379,26 +398,30 @@ void ofxLibdc::setImageType(int imageType) {
 }
 
 void ofxLibdc::setTransmit(bool transmit) {
-	dc1394switch_t cur, target;
-	dc1394_video_get_transmission(camera, &cur);
-	target = transmit ? DC1394_ON : DC1394_OFF;
-	if(cur != target)
-		dc1394_video_set_transmission(camera, target);
+	if(camera) {
+		dc1394switch_t cur, target;
+		dc1394_video_get_transmission(camera, &cur);
+		target = transmit ? DC1394_ON : DC1394_OFF;
+		if(cur != target)
+			dc1394_video_set_transmission(camera, target);
+	}
 }
 
 void ofxLibdc::grabStill(ofImage& img) {
-	setTransmit(false);
-	flushBuffer();
-	dc1394_video_set_one_shot(camera, DC1394_ON);
-	// if possible, the following should be replaced with a call to grabFrame
-	dc1394video_frame_t *frame;
-	dc1394_capture_dequeue(camera, capturePolicy, &frame);
-	img.allocate(width, height, imageType);
-	if(imageType == OF_IMAGE_GRAYSCALE) {
-		memcpy(img.getPixels(), frame->image, width * height);
-	} else if(imageType == OF_IMAGE_COLOR) {
+	if(camera) {
+		setTransmit(false);
+		flushBuffer();
+		dc1394_video_set_one_shot(camera, DC1394_ON);
+		// if possible, the following should be replaced with a call to grabFrame
+		dc1394video_frame_t *frame;
+		dc1394_capture_dequeue(camera, capturePolicy, &frame);
+		img.allocate(width, height, imageType);
+		if(imageType == OF_IMAGE_GRAYSCALE) {
+			memcpy(img.getPixels(), frame->image, width * height);
+		} else if(imageType == OF_IMAGE_COLOR) {
+		}
+		dc1394_capture_enqueue(camera, frame);
 	}
-	dc1394_capture_enqueue(camera, frame);
 }
 
 bool ofxLibdc::grabVideo(ofImage& img, bool dropFrames) {
@@ -423,27 +446,33 @@ bool ofxLibdc::grabVideo(ofImage& img, bool dropFrames) {
 }
 
 bool ofxLibdc::grabFrame(ofImage& img) {
-	dc1394video_frame_t *frame;
-	dc1394_capture_dequeue(camera, capturePolicy, &frame);
-	if(frame != NULL) {
-		if(imageType == OF_IMAGE_GRAYSCALE) {
-			memcpy(img.getPixels(), frame->image, width * height);
-		} else if(imageType == OF_IMAGE_COLOR) {
+	if(camera) {
+		dc1394video_frame_t *frame;
+		dc1394_capture_dequeue(camera, capturePolicy, &frame);
+		if(frame != NULL) {
+			if(imageType == OF_IMAGE_GRAYSCALE) {
+				memcpy(img.getPixels(), frame->image, width * height);
+			} else if(imageType == OF_IMAGE_COLOR) {
+			}
+			dc1394_capture_enqueue(camera, frame);
+			return true;
+		} else {
+			return false;
 		}
-		dc1394_capture_enqueue(camera, frame);
-		return true;
 	} else {
 		return false;
 	}
 }
 
 void ofxLibdc::flushBuffer() {
-	dc1394video_frame_t *frame;
-	do {
-		dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_POLL, &frame);
-		if(frame != NULL)
-			dc1394_capture_enqueue(camera, frame);
-	} while (frame != NULL);
+	if(camera) {
+		dc1394video_frame_t *frame;
+		do {
+			dc1394_capture_dequeue(camera, DC1394_CAPTURE_POLICY_POLL, &frame);
+			if(frame != NULL)
+				dc1394_capture_enqueue(camera, frame);
+		} while (frame != NULL);
+	}
 }
 
 dc1394camera_t* ofxLibdc::getLibdcCamera() {

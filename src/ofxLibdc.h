@@ -17,7 +17,7 @@ public:
 	void set1394b(bool use1394b);
 	void setBlocking(bool blocking);
 	
-	virtual void setup(int cameraNumber = 0);
+	virtual bool setup(int cameraNumber = 0);
 	virtual ~ofxLibdc();
 	
 	void setBrightness(unsigned int brightness);
@@ -89,8 +89,8 @@ protected:
 	bool use1394b;
 	
 	bool grabFrame(ofImage& img);
-	void initCamera(int cameraNumber);
-	void applySettings();
+	bool initCamera(int cameraNumber);
+	bool applySettings();
 	
 	void quantizeSize();
 	void quantizePosition();
