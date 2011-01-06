@@ -24,7 +24,7 @@ public:
 	void draw() {
 		curFrame.draw(0, 0);
 	}
-}
+};
 
 Because there is no separate capture thread, there is no overhead from copying images you don't need.
 
