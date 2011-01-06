@@ -175,6 +175,7 @@ bool ofxLibdc::applySettings() {
 			}
 			if(i == video_modes.num - 1) {
 				ofLog(OF_LOG_ERROR, "Camera does not support target mode.");
+				camera = NULL;
 				return false;
 			}
 		}
@@ -425,23 +426,27 @@ void ofxLibdc::grabStill(ofImage& img) {
 }
 
 bool ofxLibdc::grabVideo(ofImage& img, bool dropFrames) {
-	setTransmit(true);
-	// don't trust allocate() to be smart
-	if(img.getWidth() != width || img.getHeight() != height) {
-		img.allocate(width, height, imageType);
-	}
-	if(dropFrames) {
-		bool remaining;
-		int i = 0;
-		do {
-			remaining = grabFrame(img);
-			if(!remaining && i == 0)
-				return false;
-			i++;
-		} while (remaining);
-		return true;
+	if(camera) {
+		setTransmit(true);
+		// don't trust allocate() to be smart
+		if(img.getWidth() != width || img.getHeight() != height) {
+			img.allocate(width, height, imageType);
+		}
+		if(dropFrames) {
+			bool remaining;
+			int i = 0;
+			do {
+				remaining = grabFrame(img);
+				if(!remaining && i == 0)
+					return false;
+				i++;
+			} while (remaining);
+			return true;
+		} else {
+			return grabFrame(img);
+		}
 	} else {
-		return grabFrame(img);
+		return false;
 	}
 }
 
