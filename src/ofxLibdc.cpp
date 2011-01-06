@@ -160,24 +160,43 @@ bool ofxLibdc::applySettings() {
 	} else {
 		dc1394video_modes_t video_modes;
 		dc1394_video_get_supported_modes(camera, &video_modes);
-		dc1394color_coding_t coding;
 		dc1394color_coding_t targetCoding = getLibdcType(imageType);
-		for (int i = 0; i < video_modes.num; i++) {
+		
+		float bestDistance = 0;
+		dc1394video_mode_t bestMode;
+		bool found = false;
+		for(int i = 0; i < video_modes.num; i++) {
 			if (!dc1394_is_video_mode_scalable(video_modes.modes[i])) {
 				dc1394video_mode_t curMode = video_modes.modes[i];
-				dc1394_get_color_coding_from_video_mode(camera, curMode, &coding);
 				unsigned int curWidth, curHeight;
 				dc1394_get_image_size_from_video_mode(camera, curMode, &curWidth, &curHeight);
-				if (coding == targetCoding && width == curWidth && height == curHeight) {
-					videoMode = curMode;
-					break;
+				ofLog(OF_LOG_VERBOSE,
+					  "Camera mode " + ofToString(i) + ": " + makeString(targetCoding) + " " +
+					  ofToString((int) curWidth) + "x" + ofToString((int) curHeight));
+				dc1394color_coding_t curCoding;
+				dc1394_get_color_coding_from_video_mode(camera, curMode, &curCoding);
+				if(curCoding == targetCoding) {
+					float curDistance = ofDist(curWidth, curHeight, width, height);
+					if(!found || curDistance < bestDistance) {
+						bestMode = curMode;
+						bestDistance = curDistance;
+					}
+					found = true;
 				}
 			}
-			if(i == video_modes.num - 1) {
-				ofLog(OF_LOG_ERROR, "Camera does not support target mode.");
-				camera = NULL;
-				return false;
-			}
+		}
+		
+		if(!found) {
+			ofLog(OF_LOG_ERROR, "Camera does not support target color coding.");
+			camera = NULL;
+			return false;
+		} else {
+			unsigned int bestWidth, bestHeight;
+			dc1394_get_image_size_from_video_mode(camera, bestMode, &bestWidth, &bestHeight);
+			ofLog(OF_LOG_VERBOSE, "Using resolution: " + ofToString((int) bestWidth) + "x" + ofToString((int) bestHeight));
+			width = bestWidth;
+			height = bestHeight;
+			videoMode = bestMode;
 		}
 		
 		// get fastest framerate
@@ -482,4 +501,19 @@ void ofxLibdc::flushBuffer() {
 
 dc1394camera_t* ofxLibdc::getLibdcCamera() {
 	return camera;
+}
+
+string ofxLibdc::makeString(int name) {
+	switch(name) {
+		case DC1394_COLOR_CODING_MONO8: return "DC1394_COLOR_CODING_MONO8"; break;
+		case DC1394_COLOR_CODING_YUV411: return "DC1394_COLOR_CODING_YUV411"; break;
+		case DC1394_COLOR_CODING_YUV422: return "DC1394_COLOR_CODING_YUV422"; break;
+		case DC1394_COLOR_CODING_RGB8: return "DC1394_COLOR_CODING_RGB8"; break;
+		case DC1394_COLOR_CODING_MONO16: return "DC1394_COLOR_CODING_MONO16"; break;
+		case DC1394_COLOR_CODING_RGB16: return "DC1394_COLOR_CODING_RGB16"; break;
+		case DC1394_COLOR_CODING_MONO16S: return "DC1394_COLOR_CODING_MONO16S"; break;
+		case DC1394_COLOR_CODING_RGB16S: return "DC1394_COLOR_CODING_RGB16S"; break;
+		case DC1394_COLOR_CODING_RAW8: return "DC1394_COLOR_CODING_RAW8"; break;
+		case DC1394_COLOR_CODING_RAW16: return "DC1394_COLOR_CODING_RAW16"; break;
+	}
 }

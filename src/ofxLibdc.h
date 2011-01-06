@@ -96,4 +96,6 @@ protected:
 	void quantizePosition();
 	
 	void setTransmit(bool transmit);
+	
+	string makeString(int name);
 };
