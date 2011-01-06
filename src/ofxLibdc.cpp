@@ -193,7 +193,6 @@ bool ofxLibdc::applySettings() {
 		} else {
 			unsigned int bestWidth, bestHeight;
 			dc1394_get_image_size_from_video_mode(camera, bestMode, &bestWidth, &bestHeight);
-			ofLog(OF_LOG_VERBOSE, "Using resolution: " + ofToString((int) bestWidth) + "x" + ofToString((int) bestHeight));
 			width = bestWidth;
 			height = bestHeight;
 			videoMode = bestMode;
@@ -212,8 +211,10 @@ bool ofxLibdc::applySettings() {
 		dc1394_format7_set_roi(camera, videoMode, getLibdcType(imageType), DC1394_USE_MAX_AVAIL, left, top, width, height);
 		unsigned int curWidth, curHeight;
 		dc1394_format7_get_image_size(camera, videoMode, &curWidth, &curHeight);
+		ofLog(OF_LOG_VERBOSE, "Using mode: " + ofToString((int) width) + "x" + ofToString((int) height));
 	} else {
 		dc1394_video_set_framerate(camera, framerate);
+		ofLog(OF_LOG_VERBOSE, "Using mode: " + ofToString((int) width) + "x" + ofToString((int) height) + " " + makeString(framerate) + "fps");
 	}
 	
 	// contrary to the libdc1394 format7 demo, this should go after the roi setting
@@ -503,17 +504,35 @@ dc1394camera_t* ofxLibdc::getLibdcCamera() {
 	return camera;
 }
 
+/*
+ This macro is used for converting an enum like DC1394_COLOR_CODING_MONO8 to the code:
+ 
+ case DC1394_COLOR_CODING_MONO8: return "DC1394_COLOR_CODING_MONO8"; break;
+ 
+ Which can be used as part of a big switch statement for printing enum names dynamically.
+ The slightly unusual "#" in the macro is responsible for surrounding the enum in quotes.
+ */
+#define enumCase( name ) {case name: return # name; break;}
+
 string ofxLibdc::makeString(int name) {
 	switch(name) {
-		case DC1394_COLOR_CODING_MONO8: return "DC1394_COLOR_CODING_MONO8"; break;
-		case DC1394_COLOR_CODING_YUV411: return "DC1394_COLOR_CODING_YUV411"; break;
-		case DC1394_COLOR_CODING_YUV422: return "DC1394_COLOR_CODING_YUV422"; break;
-		case DC1394_COLOR_CODING_RGB8: return "DC1394_COLOR_CODING_RGB8"; break;
-		case DC1394_COLOR_CODING_MONO16: return "DC1394_COLOR_CODING_MONO16"; break;
-		case DC1394_COLOR_CODING_RGB16: return "DC1394_COLOR_CODING_RGB16"; break;
-		case DC1394_COLOR_CODING_MONO16S: return "DC1394_COLOR_CODING_MONO16S"; break;
-		case DC1394_COLOR_CODING_RGB16S: return "DC1394_COLOR_CODING_RGB16S"; break;
-		case DC1394_COLOR_CODING_RAW8: return "DC1394_COLOR_CODING_RAW8"; break;
-		case DC1394_COLOR_CODING_RAW16: return "DC1394_COLOR_CODING_RAW16"; break;
+		enumCase(DC1394_COLOR_CODING_MONO8)
+		enumCase(DC1394_COLOR_CODING_YUV411)
+		enumCase(DC1394_COLOR_CODING_YUV422)
+		enumCase(DC1394_COLOR_CODING_RGB8)
+		enumCase(DC1394_COLOR_CODING_MONO16)
+		enumCase(DC1394_COLOR_CODING_RGB16)
+		enumCase(DC1394_COLOR_CODING_MONO16S)
+		enumCase(DC1394_COLOR_CODING_RGB16S)
+		enumCase(DC1394_COLOR_CODING_RAW8)
+		enumCase(DC1394_COLOR_CODING_RAW16)
+		enumCase(DC1394_FRAMERATE_1_875)
+		enumCase(DC1394_FRAMERATE_3_75)
+		enumCase(DC1394_FRAMERATE_7_5)
+		enumCase(DC1394_FRAMERATE_15)
+		enumCase(DC1394_FRAMERATE_30)
+		enumCase(DC1394_FRAMERATE_60)
+		enumCase(DC1394_FRAMERATE_120)
+		enumCase(DC1394_FRAMERATE_240)
 	}
 }
