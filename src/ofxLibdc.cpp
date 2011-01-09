@@ -85,6 +85,7 @@ void ofxLibdc::set1394b(bool use1394b) {
 		applySettings();
 }
 
+// todo: add an error message if you set an invalid (too big) size
 void ofxLibdc::setSize(unsigned int width, unsigned int height) {
 	bool changed = width != this->width || height != this->height; 
 	this->width = width;
@@ -93,6 +94,7 @@ void ofxLibdc::setSize(unsigned int width, unsigned int height) {
 		applySettings();
 }
 
+// todo: add an error message if you set an invalid (out of bounds) position
 void ofxLibdc::setPosition(unsigned int left, unsigned int top) {
 	bool changed = left != this->left || top != this->top; 
 	this->left = left;
@@ -118,7 +120,7 @@ bool ofxLibdc::initCamera(int cameraNumber) {
 	camera = dc1394_camera_new(libdcContext, list->ids[cameraNumber].guid);
 	if (!camera) {
 		stringstream error;
-		error << "Failed to initialize camera " << cameraNumber << " with guid " << list->ids[cameraNumber].guid;
+		error << "Failed to initialize camera " << cameraNumber << " with GUID " << list->ids[cameraNumber].guid;
 		ofLog(OF_LOG_ERROR, error.str());
 		return false;
 	} else {
@@ -157,6 +159,11 @@ bool ofxLibdc::applySettings() {
 	dc1394framerate_t framerate;
 	if(useFormat7) {
 		videoMode = (dc1394video_mode_t) ((int) DC1394_VIDEO_MODE_FORMAT7_0 + format7Mode);
+		unsigned int maxWidth, maxHeight;
+		dc1394_format7_get_max_image_size(camera, videoMode, &maxWidth, &maxHeight);
+		stringstream msg;
+		msg << "Maximum size for current Format7 mode is " << maxWidth << "x" << maxHeight;
+		ofLog(OF_LOG_VERBOSE, msg.str());
 	} else {
 		dc1394video_modes_t video_modes;
 		dc1394_video_get_supported_modes(camera, &video_modes);
