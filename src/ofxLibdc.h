@@ -16,8 +16,11 @@ public:
 	void setFormat7(bool useFormat7, int mode = 0);
 	void set1394b(bool use1394b);
 	void setBlocking(bool blocking);
+	void setFrameRate(float targetFrameRate);
 	
 	virtual bool setup(int cameraNumber = 0);
+	bool setup(string guid);
+
 	virtual ~ofxLibdc();
 	
 	void setBrightness(unsigned int brightness);
@@ -66,6 +69,8 @@ public:
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
 	int getImageType() const;
+	void getAvailableFrameRates(vector<float> &framerates);
+	float getFrameRate();
 	void printFeatures() const;
 	
 	dc1394camera_t* getLibdcCamera();
@@ -82,14 +87,18 @@ protected:
 	dc1394camera_t* camera;
 	dc1394video_mode_t videoMode;
 	dc1394capture_policy_t capturePolicy;
+	dc1394framerate_t framerate;
+	float targetFramerate;
 	unsigned int width, height, left, top;
 	int imageType;
 	bool useFormat7;
 	int format7Mode;
 	bool use1394b;
+
+	void setFrameRate(float fps, bool apply);
 	
 	bool grabFrame(ofImage& img);
-	bool initCamera(int cameraNumber);
+	bool initCamera(int cameraNumber, string guid);
 	bool applySettings();
 	
 	void quantizeSize();
