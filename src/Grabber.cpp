@@ -58,4 +58,8 @@ void Grabber::close() {
 	// handled automatically by ~Camera
 }
 
+ofPixels& Grabber::getPixelsRef() {
+	return buffer.getPixelsRef();
+}
+
 }

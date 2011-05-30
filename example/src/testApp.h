@@ -10,5 +10,6 @@ public:
 	void draw();
 	
 	ofxLibdc::Camera camera;
+	ofxLibdc::Grabber grabber;
 	ofImage curFrame;
 };

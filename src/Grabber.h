@@ -34,6 +34,7 @@ public:
 	float getHeight();
 	bool isFrameNew();
 	void close();
+	ofPixels& getPixelsRef();
 protected:
 	ofImage buffer;
 	bool newFrame;
