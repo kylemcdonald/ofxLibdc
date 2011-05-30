@@ -511,11 +511,10 @@ dc1394camera_t* ofxLibdc::getLibdcCamera() {
 	return camera;
 }
 
-<<<<<<< HEAD
 bool ofxLibdc::ready() const {
 	return camera != NULL;
 }
-=======
+
 /*
  This macro is used for converting an enum like DC1394_COLOR_CODING_MONO8 to the code:
  
@@ -548,4 +547,3 @@ string ofxLibdc::makeString(int name) {
 		enumCase(DC1394_FRAMERATE_240)
 	}
 }
->>>>>>> d5060270dbb5955ea01e0d05905bbe9c10ef783a
