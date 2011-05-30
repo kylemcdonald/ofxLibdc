@@ -1,4 +1,4 @@
-#include "ofxLibdcPtGrey.h"
+#include "PointGrey.h"
 
 namespace ofxLibdc {
 

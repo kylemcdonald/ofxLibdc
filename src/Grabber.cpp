@@ -1,4 +1,4 @@
-#include "ofxLibdcGrabber.h"
+#include "Grabber.h"
 
 namespace ofxLibdc {
 

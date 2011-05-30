@@ -1,4 +1,4 @@
-#include "ofxLibdc.h"
+#include "Camera.h"
 
 namespace ofxLibdc {
 

@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		276A0748139437C600AE05EE /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 276A073D139437C600AE05EE /* libdc1394.a */; };
-		276A0749139437C600AE05EE /* ofxLibdc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 276A0740139437C600AE05EE /* ofxLibdc.cpp */; };
-		276A074A139437C600AE05EE /* ofxLibdcGrabber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 276A0742139437C600AE05EE /* ofxLibdcGrabber.cpp */; };
-		276A074B139437C600AE05EE /* ofxLibdcPtGrey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 276A0744139437C600AE05EE /* ofxLibdcPtGrey.cpp */; };
+		276A08B813943F6D00AE05EE /* libdc1394.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 276A08A713943F6D00AE05EE /* libdc1394.a */; };
+		276A08B913943F6D00AE05EE /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 276A08AA13943F6D00AE05EE /* Camera.cpp */; };
+		276A08BA13943F6D00AE05EE /* Grabber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 276A08AC13943F6D00AE05EE /* Grabber.cpp */; };
+		276A08BB13943F6D00AE05EE /* PointGrey.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 276A08AF13943F6D00AE05EE /* PointGrey.cpp */; };
 		E45BE0AA0E8CC67C009D7055 /* GLee.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE0A90E8CC67C009D7055 /* GLee.a */; };
 		E45BE2E40E8CC69C009D7055 /* rtAudio.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE2E30E8CC69C009D7055 /* rtAudio.a */; };
 		E45BE97B0E8CC7DD009D7055 /* AGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E45BE9710E8CC7DD009D7055 /* AGL.framework */; };
@@ -82,30 +82,31 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		276A0729139437C600AE05EE /* dc1394.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394.h; path = ../libs/osx/include/dc1394/dc1394.h; sourceTree = SOURCE_ROOT; };
-		276A072A139437C600AE05EE /* dc1394_camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_camera.h; path = ../libs/osx/include/dc1394/dc1394_camera.h; sourceTree = SOURCE_ROOT; };
-		276A072B139437C600AE05EE /* dc1394_capture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_capture.h; path = ../libs/osx/include/dc1394/dc1394_capture.h; sourceTree = SOURCE_ROOT; };
-		276A072C139437C600AE05EE /* dc1394_control.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_control.h; path = ../libs/osx/include/dc1394/dc1394_control.h; sourceTree = SOURCE_ROOT; };
-		276A072D139437C600AE05EE /* dc1394_conversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_conversions.h; path = ../libs/osx/include/dc1394/dc1394_conversions.h; sourceTree = SOURCE_ROOT; };
-		276A072E139437C600AE05EE /* dc1394_format7.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_format7.h; path = ../libs/osx/include/dc1394/dc1394_format7.h; sourceTree = SOURCE_ROOT; };
-		276A072F139437C600AE05EE /* dc1394_iso.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_iso.h; path = ../libs/osx/include/dc1394/dc1394_iso.h; sourceTree = SOURCE_ROOT; };
-		276A0730139437C600AE05EE /* dc1394_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_log.h; path = ../libs/osx/include/dc1394/dc1394_log.h; sourceTree = SOURCE_ROOT; };
-		276A0731139437C600AE05EE /* dc1394_register.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_register.h; path = ../libs/osx/include/dc1394/dc1394_register.h; sourceTree = SOURCE_ROOT; };
-		276A0732139437C600AE05EE /* dc1394_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_types.h; path = ../libs/osx/include/dc1394/dc1394_types.h; sourceTree = SOURCE_ROOT; };
-		276A0733139437C600AE05EE /* dc1394_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_utils.h; path = ../libs/osx/include/dc1394/dc1394_utils.h; sourceTree = SOURCE_ROOT; };
-		276A0734139437C600AE05EE /* dc1394_video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_video.h; path = ../libs/osx/include/dc1394/dc1394_video.h; sourceTree = SOURCE_ROOT; };
-		276A0736139437C600AE05EE /* capture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = capture.h; path = ../libs/osx/include/dc1394/macosx/capture.h; sourceTree = SOURCE_ROOT; };
-		276A0738139437C600AE05EE /* avt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avt.h; path = ../libs/osx/include/dc1394/vendor/avt.h; sourceTree = SOURCE_ROOT; };
-		276A0739139437C600AE05EE /* basler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basler.h; path = ../libs/osx/include/dc1394/vendor/basler.h; sourceTree = SOURCE_ROOT; };
-		276A073A139437C600AE05EE /* basler_sff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basler_sff.h; path = ../libs/osx/include/dc1394/vendor/basler_sff.h; sourceTree = SOURCE_ROOT; };
-		276A073B139437C600AE05EE /* pixelink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pixelink.h; path = ../libs/osx/include/dc1394/vendor/pixelink.h; sourceTree = SOURCE_ROOT; };
-		276A073D139437C600AE05EE /* libdc1394.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdc1394.a; path = ../libs/osx/lib/libdc1394.a; sourceTree = SOURCE_ROOT; };
-		276A0740139437C600AE05EE /* ofxLibdc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxLibdc.cpp; path = ../src/ofxLibdc.cpp; sourceTree = SOURCE_ROOT; };
-		276A0741139437C600AE05EE /* ofxLibdc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxLibdc.h; path = ../src/ofxLibdc.h; sourceTree = SOURCE_ROOT; };
-		276A0742139437C600AE05EE /* ofxLibdcGrabber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxLibdcGrabber.cpp; path = ../src/ofxLibdcGrabber.cpp; sourceTree = SOURCE_ROOT; };
-		276A0743139437C600AE05EE /* ofxLibdcGrabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxLibdcGrabber.h; path = ../src/ofxLibdcGrabber.h; sourceTree = SOURCE_ROOT; };
-		276A0744139437C600AE05EE /* ofxLibdcPtGrey.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxLibdcPtGrey.cpp; path = ../src/ofxLibdcPtGrey.cpp; sourceTree = SOURCE_ROOT; };
-		276A0745139437C600AE05EE /* ofxLibdcPtGrey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxLibdcPtGrey.h; path = ../src/ofxLibdcPtGrey.h; sourceTree = SOURCE_ROOT; };
+		276A089313943F6D00AE05EE /* dc1394.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394.h; path = ../libs/osx/include/dc1394/dc1394.h; sourceTree = SOURCE_ROOT; };
+		276A089413943F6D00AE05EE /* dc1394_camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_camera.h; path = ../libs/osx/include/dc1394/dc1394_camera.h; sourceTree = SOURCE_ROOT; };
+		276A089513943F6D00AE05EE /* dc1394_capture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_capture.h; path = ../libs/osx/include/dc1394/dc1394_capture.h; sourceTree = SOURCE_ROOT; };
+		276A089613943F6D00AE05EE /* dc1394_control.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_control.h; path = ../libs/osx/include/dc1394/dc1394_control.h; sourceTree = SOURCE_ROOT; };
+		276A089713943F6D00AE05EE /* dc1394_conversions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_conversions.h; path = ../libs/osx/include/dc1394/dc1394_conversions.h; sourceTree = SOURCE_ROOT; };
+		276A089813943F6D00AE05EE /* dc1394_format7.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_format7.h; path = ../libs/osx/include/dc1394/dc1394_format7.h; sourceTree = SOURCE_ROOT; };
+		276A089913943F6D00AE05EE /* dc1394_iso.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_iso.h; path = ../libs/osx/include/dc1394/dc1394_iso.h; sourceTree = SOURCE_ROOT; };
+		276A089A13943F6D00AE05EE /* dc1394_log.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_log.h; path = ../libs/osx/include/dc1394/dc1394_log.h; sourceTree = SOURCE_ROOT; };
+		276A089B13943F6D00AE05EE /* dc1394_register.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_register.h; path = ../libs/osx/include/dc1394/dc1394_register.h; sourceTree = SOURCE_ROOT; };
+		276A089C13943F6D00AE05EE /* dc1394_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_types.h; path = ../libs/osx/include/dc1394/dc1394_types.h; sourceTree = SOURCE_ROOT; };
+		276A089D13943F6D00AE05EE /* dc1394_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_utils.h; path = ../libs/osx/include/dc1394/dc1394_utils.h; sourceTree = SOURCE_ROOT; };
+		276A089E13943F6D00AE05EE /* dc1394_video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dc1394_video.h; path = ../libs/osx/include/dc1394/dc1394_video.h; sourceTree = SOURCE_ROOT; };
+		276A08A013943F6D00AE05EE /* capture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = capture.h; path = ../libs/osx/include/dc1394/macosx/capture.h; sourceTree = SOURCE_ROOT; };
+		276A08A213943F6D00AE05EE /* avt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = avt.h; path = ../libs/osx/include/dc1394/vendor/avt.h; sourceTree = SOURCE_ROOT; };
+		276A08A313943F6D00AE05EE /* basler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basler.h; path = ../libs/osx/include/dc1394/vendor/basler.h; sourceTree = SOURCE_ROOT; };
+		276A08A413943F6D00AE05EE /* basler_sff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basler_sff.h; path = ../libs/osx/include/dc1394/vendor/basler_sff.h; sourceTree = SOURCE_ROOT; };
+		276A08A513943F6D00AE05EE /* pixelink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pixelink.h; path = ../libs/osx/include/dc1394/vendor/pixelink.h; sourceTree = SOURCE_ROOT; };
+		276A08A713943F6D00AE05EE /* libdc1394.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdc1394.a; path = ../libs/osx/lib/libdc1394.a; sourceTree = SOURCE_ROOT; };
+		276A08AA13943F6D00AE05EE /* Camera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Camera.cpp; path = ../src/Camera.cpp; sourceTree = SOURCE_ROOT; };
+		276A08AB13943F6D00AE05EE /* Camera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Camera.h; path = ../src/Camera.h; sourceTree = SOURCE_ROOT; };
+		276A08AC13943F6D00AE05EE /* Grabber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Grabber.cpp; path = ../src/Grabber.cpp; sourceTree = SOURCE_ROOT; };
+		276A08AD13943F6D00AE05EE /* Grabber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Grabber.h; path = ../src/Grabber.h; sourceTree = SOURCE_ROOT; };
+		276A08AF13943F6D00AE05EE /* PointGrey.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PointGrey.cpp; path = ../src/PointGrey.cpp; sourceTree = SOURCE_ROOT; };
+		276A08B013943F6D00AE05EE /* PointGrey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PointGrey.h; path = ../src/PointGrey.h; sourceTree = SOURCE_ROOT; };
+		276A08BF13943FA200AE05EE /* ofxLibdc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLibdc.h; sourceTree = "<group>"; };
 		E45BE0390E8CC647009D7055 /* FreeImage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FreeImage.h; path = ../../../libs/freeimage/include/FreeImage.h; sourceTree = SOURCE_ROOT; };
 		E45BE03F0E8CC650009D7055 /* fmod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fmod.h; path = ../../../libs/fmodex/include/fmod.h; sourceTree = SOURCE_ROOT; };
 		E45BE0400E8CC650009D7055 /* fmod.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = fmod.hpp; path = ../../../libs/fmodex/include/fmod.hpp; sourceTree = SOURCE_ROOT; };
@@ -176,112 +177,113 @@
 				E4C2429410CC5C38004149E2 /* freetype.a in Frameworks */,
 				E4C242CD10CC650E004149E2 /* libfmodex.dylib in Frameworks */,
 				E4C246DA10CCAE22004149E2 /* freeimage.a in Frameworks */,
-				276A0748139437C600AE05EE /* libdc1394.a in Frameworks */,
+				276A08B813943F6D00AE05EE /* libdc1394.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		276A06A9139437C600AE05EE /* ofxLibdc */ = {
+		276A07C513943F6D00AE05EE /* ofxLibdc */ = {
 			isa = PBXGroup;
 			children = (
-				276A0725139437C600AE05EE /* libs */,
-				276A073F139437C600AE05EE /* src */,
+				276A088F13943F6D00AE05EE /* libs */,
+				276A08A913943F6D00AE05EE /* src */,
 			);
 			name = ofxLibdc;
 			path = ..;
 			sourceTree = SOURCE_ROOT;
 		};
-		276A0725139437C600AE05EE /* libs */ = {
+		276A088F13943F6D00AE05EE /* libs */ = {
 			isa = PBXGroup;
 			children = (
-				276A0726139437C600AE05EE /* osx */,
+				276A089013943F6D00AE05EE /* osx */,
 			);
 			name = libs;
 			path = ../libs;
 			sourceTree = SOURCE_ROOT;
 		};
-		276A0726139437C600AE05EE /* osx */ = {
+		276A089013943F6D00AE05EE /* osx */ = {
 			isa = PBXGroup;
 			children = (
-				276A0727139437C600AE05EE /* include */,
-				276A073C139437C600AE05EE /* lib */,
+				276A089113943F6D00AE05EE /* include */,
+				276A08A613943F6D00AE05EE /* lib */,
 			);
 			name = osx;
 			path = ../libs/osx;
 			sourceTree = SOURCE_ROOT;
 		};
-		276A0727139437C600AE05EE /* include */ = {
+		276A089113943F6D00AE05EE /* include */ = {
 			isa = PBXGroup;
 			children = (
-				276A0728139437C600AE05EE /* dc1394 */,
+				276A089213943F6D00AE05EE /* dc1394 */,
 			);
 			name = include;
 			path = ../libs/osx/include;
 			sourceTree = SOURCE_ROOT;
 		};
-		276A0728139437C600AE05EE /* dc1394 */ = {
+		276A089213943F6D00AE05EE /* dc1394 */ = {
 			isa = PBXGroup;
 			children = (
-				276A0729139437C600AE05EE /* dc1394.h */,
-				276A072A139437C600AE05EE /* dc1394_camera.h */,
-				276A072B139437C600AE05EE /* dc1394_capture.h */,
-				276A072C139437C600AE05EE /* dc1394_control.h */,
-				276A072D139437C600AE05EE /* dc1394_conversions.h */,
-				276A072E139437C600AE05EE /* dc1394_format7.h */,
-				276A072F139437C600AE05EE /* dc1394_iso.h */,
-				276A0730139437C600AE05EE /* dc1394_log.h */,
-				276A0731139437C600AE05EE /* dc1394_register.h */,
-				276A0732139437C600AE05EE /* dc1394_types.h */,
-				276A0733139437C600AE05EE /* dc1394_utils.h */,
-				276A0734139437C600AE05EE /* dc1394_video.h */,
-				276A0735139437C600AE05EE /* macosx */,
-				276A0737139437C600AE05EE /* vendor */,
+				276A089313943F6D00AE05EE /* dc1394.h */,
+				276A089413943F6D00AE05EE /* dc1394_camera.h */,
+				276A089513943F6D00AE05EE /* dc1394_capture.h */,
+				276A089613943F6D00AE05EE /* dc1394_control.h */,
+				276A089713943F6D00AE05EE /* dc1394_conversions.h */,
+				276A089813943F6D00AE05EE /* dc1394_format7.h */,
+				276A089913943F6D00AE05EE /* dc1394_iso.h */,
+				276A089A13943F6D00AE05EE /* dc1394_log.h */,
+				276A089B13943F6D00AE05EE /* dc1394_register.h */,
+				276A089C13943F6D00AE05EE /* dc1394_types.h */,
+				276A089D13943F6D00AE05EE /* dc1394_utils.h */,
+				276A089E13943F6D00AE05EE /* dc1394_video.h */,
+				276A089F13943F6D00AE05EE /* macosx */,
+				276A08A113943F6D00AE05EE /* vendor */,
 			);
 			name = dc1394;
 			path = ../libs/osx/include/dc1394;
 			sourceTree = SOURCE_ROOT;
 		};
-		276A0735139437C600AE05EE /* macosx */ = {
+		276A089F13943F6D00AE05EE /* macosx */ = {
 			isa = PBXGroup;
 			children = (
-				276A0736139437C600AE05EE /* capture.h */,
+				276A08A013943F6D00AE05EE /* capture.h */,
 			);
 			name = macosx;
 			path = ../libs/osx/include/dc1394/macosx;
 			sourceTree = SOURCE_ROOT;
 		};
-		276A0737139437C600AE05EE /* vendor */ = {
+		276A08A113943F6D00AE05EE /* vendor */ = {
 			isa = PBXGroup;
 			children = (
-				276A0738139437C600AE05EE /* avt.h */,
-				276A0739139437C600AE05EE /* basler.h */,
-				276A073A139437C600AE05EE /* basler_sff.h */,
-				276A073B139437C600AE05EE /* pixelink.h */,
+				276A08A213943F6D00AE05EE /* avt.h */,
+				276A08A313943F6D00AE05EE /* basler.h */,
+				276A08A413943F6D00AE05EE /* basler_sff.h */,
+				276A08A513943F6D00AE05EE /* pixelink.h */,
 			);
 			name = vendor;
 			path = ../libs/osx/include/dc1394/vendor;
 			sourceTree = SOURCE_ROOT;
 		};
-		276A073C139437C600AE05EE /* lib */ = {
+		276A08A613943F6D00AE05EE /* lib */ = {
 			isa = PBXGroup;
 			children = (
-				276A073D139437C600AE05EE /* libdc1394.a */,
+				276A08A713943F6D00AE05EE /* libdc1394.a */,
 			);
 			name = lib;
 			path = ../libs/osx/lib;
 			sourceTree = SOURCE_ROOT;
 		};
-		276A073F139437C600AE05EE /* src */ = {
+		276A08A913943F6D00AE05EE /* src */ = {
 			isa = PBXGroup;
 			children = (
-				276A0740139437C600AE05EE /* ofxLibdc.cpp */,
-				276A0741139437C600AE05EE /* ofxLibdc.h */,
-				276A0742139437C600AE05EE /* ofxLibdcGrabber.cpp */,
-				276A0743139437C600AE05EE /* ofxLibdcGrabber.h */,
-				276A0744139437C600AE05EE /* ofxLibdcPtGrey.cpp */,
-				276A0745139437C600AE05EE /* ofxLibdcPtGrey.h */,
+				276A08BF13943FA200AE05EE /* ofxLibdc.h */,
+				276A08AA13943F6D00AE05EE /* Camera.cpp */,
+				276A08AB13943F6D00AE05EE /* Camera.h */,
+				276A08AC13943F6D00AE05EE /* Grabber.cpp */,
+				276A08AD13943F6D00AE05EE /* Grabber.h */,
+				276A08AF13943F6D00AE05EE /* PointGrey.cpp */,
+				276A08B013943F6D00AE05EE /* PointGrey.h */,
 			);
 			name = src;
 			path = ../src;
@@ -290,7 +292,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
-				276A06A9139437C600AE05EE /* ofxLibdc */,
+				276A07C513943F6D00AE05EE /* ofxLibdc */,
 			);
 			name = addons;
 			sourceTree = "<group>";
@@ -657,9 +659,9 @@
 			files = (
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* testApp.cpp in Sources */,
-				276A0749139437C600AE05EE /* ofxLibdc.cpp in Sources */,
-				276A074A139437C600AE05EE /* ofxLibdcGrabber.cpp in Sources */,
-				276A074B139437C600AE05EE /* ofxLibdcPtGrey.cpp in Sources */,
+				276A08B913943F6D00AE05EE /* Camera.cpp in Sources */,
+				276A08BA13943F6D00AE05EE /* Grabber.cpp in Sources */,
+				276A08BB13943F6D00AE05EE /* PointGrey.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
