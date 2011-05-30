@@ -3,11 +3,25 @@
 dc1394_t* ofxLibdc::libdcContext = NULL;
 int ofxLibdc::libdcCameras = 0;
 
+// List of frame rates as floats
+const float actualFrameRates [] = {
+	1.875,
+	3.75,
+	7.5,
+	15,
+	30,
+	60,
+	120,
+	240
+};
+
 ofxLibdc::ofxLibdc() :
 		camera(NULL),
 		imageType(OF_IMAGE_GRAYSCALE),
 		useFormat7(false),
 		use1394b(false),
+		framerate(DC1394_FRAMERATE_30),
+		targetFramerate(-1),
 		width(640),
 		height(480),
 		left(0),
@@ -105,11 +119,67 @@ void ofxLibdc::setPosition(unsigned int left, unsigned int top) {
 	}
 }
 
-bool ofxLibdc::setup(int cameraNumber) {
-	return initCamera(cameraNumber) && applySettings();
+void ofxLibdc::setFrameRate(float fps) {
+	setFrameRate(fps, true);
 }
 
-bool ofxLibdc::initCamera(int cameraNumber) {
+void ofxLibdc::setFrameRate(float fps, bool apply) {
+	
+	if(!camera) {
+		// Remember the framerate to apply when the camera is initialized
+		targetFramerate = fps;
+		return;
+	}
+	
+	// Remember the old frame rate to check if anything has changed at the end
+	dc1394framerate_t oldFrameRate = framerate;
+	dc1394framerates_t framerates;
+	dc1394_video_get_supported_framerates(camera, videoMode, &framerates);
+	
+	// Find a framerate that matches
+	int bestFrameRate = -1;
+	float smallestDistance = numeric_limits<float>::max();
+	for(int i=0; i<framerates.num; i++) {
+		// If we have an exact match use that
+		int index = framerates.framerates[i] - DC1394_FRAMERATE_MIN;
+		if(fps == actualFrameRates[index]) {
+			bestFrameRate = index;
+			break;
+		} else {
+			// Else look for the closest match
+			float thisDifference = fabs(actualFrameRates[index] - fps);
+			if(thisDifference < smallestDistance) {
+				bestFrameRate = index;
+				smallestDistance = thisDifference;
+			}
+		}
+	}
+	
+	if(bestFrameRate >= 0) {
+		framerate = framerates.framerates[bestFrameRate];
+	}
+	
+	bool changed = (oldFrameRate != framerate);
+	
+	if(camera) {
+		ofLog(OF_LOG_VERBOSE, "Framerate set to: " + ofToString(actualFrameRates[bestFrameRate], 2) + "fps");
+		if(changed && apply) {
+			applySettings();					
+		}
+	}
+	
+}
+
+bool ofxLibdc::setup(int cameraNumber) {
+	return initCamera(cameraNumber, NULL) && applySettings();
+}
+
+bool ofxLibdc::setup(string guid) {
+	return initCamera(-1, guid) && applySettings();
+}
+
+
+bool ofxLibdc::initCamera(int cameraNumber, string guid) {
 	// create camera struct
 	dc1394camera_list_t* list;
 	dc1394_camera_enumerate(libdcContext, &list);
@@ -117,16 +187,25 @@ bool ofxLibdc::initCamera(int cameraNumber) {
 		ofLog(OF_LOG_ERROR, "No cameras found.");
 		return false;
 	}
-	camera = dc1394_camera_new(libdcContext, list->ids[cameraNumber].guid);
+	
+	// USE GUID
+	uint64_t cameraGUID;
+	if(cameraNumber < 0) {
+		std::istringstream ss( guid );
+		ss >> hex >> cameraGUID;
+		
+	// USE CAMERA NUMBER	
+	} else {
+		cameraGUID = list->ids[cameraNumber].guid;
+	}
+	
+	camera = dc1394_camera_new(libdcContext, cameraGUID);
+	
 	if (!camera) {
-		stringstream error;
-		error << "Failed to initialize camera " << cameraNumber << " with GUID " << list->ids[cameraNumber].guid;
-		ofLog(OF_LOG_ERROR, error.str());
+		ofLog(OF_LOG_ERROR, "Failed to initialize camera %d with GUID %llx", cameraNumber, list->ids[cameraNumber].guid);
 		return false;
 	} else {
-		stringstream msg;
-		msg << "Using camera with GUID " << camera->guid;
-		ofLog(OF_LOG_VERBOSE, msg.str());
+		ofLog(OF_LOG_VERBOSE, "Using camera with GUID %llx", camera->guid);
 	}
 	dc1394_camera_free_list(list);
 	
@@ -156,7 +235,6 @@ bool ofxLibdc::applySettings() {
 		dc1394_video_set_iso_speed(camera, DC1394_ISO_SPEED_400);
 	}
 		
-	dc1394framerate_t framerate;
 	if(useFormat7) {
 		videoMode = (dc1394video_mode_t) ((int) DC1394_VIDEO_MODE_FORMAT7_0 + format7Mode);
 		unsigned int maxWidth, maxHeight;
@@ -205,11 +283,12 @@ bool ofxLibdc::applySettings() {
 			videoMode = bestMode;
 		}
 		
-		// get fastest framerate
-		// todo: make this settable
-		dc1394framerates_t framerates;
-		dc1394_video_get_supported_framerates(camera, videoMode, &framerates);
-		framerate = framerates.framerates[framerates.num - 1];
+	}
+
+	// If a frame rate has been specified, try and use it
+	if(targetFramerate > 0) {
+		setFrameRate(targetFramerate, false);
+		targetFramerate = -1;
 	}
 	
 	if(useFormat7) {
@@ -416,6 +495,26 @@ unsigned int ofxLibdc::getWidth() const {
 unsigned int ofxLibdc::getHeight() const {
 	return height;
 }
+
+void ofxLibdc::getAvailableFrameRates(vector<float> &framerates) {
+	if(!camera) {
+		ofLog(OF_LOG_NOTICE, "Cameras has not been initialized.");
+		return;
+	}
+	dc1394framerates_t rates;
+	dc1394_video_get_supported_framerates(camera, videoMode, &rates);
+	
+	for(int i=0; i<rates.num; i++) {
+		int index = rates.framerates[i] - DC1394_FRAMERATE_MIN;
+		framerates.push_back(actualFrameRates[index]);
+	}
+}
+
+float ofxLibdc::getFrameRate() {
+	int index = framerate - DC1394_FRAMERATE_MIN;
+	return actualFrameRates[index];
+}
+
 
 int ofxLibdc::getImageType() const {
 	return imageType;
