@@ -106,29 +106,37 @@ void ofxLibdc::setPosition(unsigned int left, unsigned int top) {
 }
 
 bool ofxLibdc::setup(int cameraNumber) {
-	return initCamera(cameraNumber) && applySettings();
-}
-
-bool ofxLibdc::initCamera(int cameraNumber) {
-	// create camera struct
 	dc1394camera_list_t* list;
 	dc1394_camera_enumerate(libdcContext, &list);
 	if(list->num == 0) {
 		ofLog(OF_LOG_ERROR, "No cameras found.");
 		return false;
 	}
-	camera = dc1394_camera_new(libdcContext, list->ids[cameraNumber].guid);
+	uint64_t cameraGuid = list->ids[cameraNumber].guid;
+	dc1394_camera_free_list(list);
+	return initCamera(cameraGuid) && applySettings();
+}
+
+bool ofxLibdc::setup(string cameraGuid) {
+	uint64_t cameraGuidInt;
+	istringstream ss(cameraGuid);
+	ss >> hex >> cameraGuidInt;
+	return initCamera(cameraGuidInt) && applySettings();
+}
+
+bool ofxLibdc::initCamera(uint64_t cameraGuid) {
+	// create camera struct
+	camera = dc1394_camera_new(libdcContext, cameraGuid);
 	if (!camera) {
 		stringstream error;
-		error << "Failed to initialize camera " << cameraNumber << " with GUID " << list->ids[cameraNumber].guid;
+		error << "Failed to initialize camera with GUID " << hex << cameraGuid;
 		ofLog(OF_LOG_ERROR, error.str());
 		return false;
 	} else {
 		stringstream msg;
-		msg << "Using camera with GUID " << camera->guid;
+		msg << "Using camera with GUID " << hex << camera->guid;
 		ofLog(OF_LOG_VERBOSE, msg.str());
 	}
-	dc1394_camera_free_list(list);
 	
 	#ifdef TARGET_OSX
 	dc1394_iso_release_bandwidth(camera, INT_MAX);

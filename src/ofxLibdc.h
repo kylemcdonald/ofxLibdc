@@ -10,6 +10,7 @@ public:
 	ofxLibdc();
 	static int getCameraCount();
 	
+	// pre-setup settings
 	void setSize(unsigned int width, unsigned int height);
 	void setPosition(unsigned int roiLeft, unsigned int roiTop);
 	void setImageType(int imageType);
@@ -18,8 +19,10 @@ public:
 	void setBlocking(bool blocking);
 	
 	virtual bool setup(int cameraNumber = 0);
+	virtual bool setup(string cameraGuid);
 	virtual ~ofxLibdc();
 	
+	// post-setup settings
 	void setBrightness(unsigned int brightness);
 	void setGamma(unsigned int gamma);
 	void setGain(unsigned int gain);
@@ -90,7 +93,7 @@ protected:
 	bool use1394b;
 	
 	bool grabFrame(ofImage& img);
-	bool initCamera(int cameraNumber);
+	bool initCamera(uint64_t cameraGuid);
 	bool applySettings();
 	
 	void quantizeSize();
