@@ -8,4 +8,7 @@ public:
 	void setup();
 	void update();
 	void draw();
+	
+	ofxLibdc camera;
+	ofImage curFrame;
 };

@@ -100,7 +100,6 @@
 		276A073A139437C600AE05EE /* basler_sff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = basler_sff.h; path = ../libs/osx/include/dc1394/vendor/basler_sff.h; sourceTree = SOURCE_ROOT; };
 		276A073B139437C600AE05EE /* pixelink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = pixelink.h; path = ../libs/osx/include/dc1394/vendor/pixelink.h; sourceTree = SOURCE_ROOT; };
 		276A073D139437C600AE05EE /* libdc1394.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libdc1394.a; path = ../libs/osx/lib/libdc1394.a; sourceTree = SOURCE_ROOT; };
-		276A073E139437C600AE05EE /* readme.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = readme.markdown; path = ../readme.markdown; sourceTree = SOURCE_ROOT; };
 		276A0740139437C600AE05EE /* ofxLibdc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxLibdc.cpp; path = ../src/ofxLibdc.cpp; sourceTree = SOURCE_ROOT; };
 		276A0741139437C600AE05EE /* ofxLibdc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ofxLibdc.h; path = ../src/ofxLibdc.h; sourceTree = SOURCE_ROOT; };
 		276A0742139437C600AE05EE /* ofxLibdcGrabber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ofxLibdcGrabber.cpp; path = ../src/ofxLibdcGrabber.cpp; sourceTree = SOURCE_ROOT; };
@@ -188,7 +187,6 @@
 			isa = PBXGroup;
 			children = (
 				276A0725139437C600AE05EE /* libs */,
-				276A073E139437C600AE05EE /* readme.markdown */,
 				276A073F139437C600AE05EE /* src */,
 			);
 			name = ofxLibdc;
