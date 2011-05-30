@@ -1,4 +1,4 @@
-* ofxLibdc is an Open Frameworks wrapper for libdc1394 that makes it easy to grab images from libdc1394-compatible cameras.
+# ofxLibdc is an Open Frameworks wrapper for libdc1394 that makes it easy to grab images from libdc1394-compatible cameras.
 
 http://openframeworks.cc/
 http://damien.douxchamps.net/ieee1394/libdc1394/
