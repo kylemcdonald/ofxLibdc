@@ -69,6 +69,7 @@ public:
 	void printFeatures() const;
 	
 	dc1394camera_t* getLibdcCamera();
+	bool ready() const;
 
 protected:
 	static dc1394_t* libdcContext;
