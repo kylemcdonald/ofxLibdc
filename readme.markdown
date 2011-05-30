@@ -1,6 +1,6 @@
 # ofxLibdc is an Open Frameworks wrapper for libdc1394 that makes it easy to grab images from libdc1394-compatible cameras.
 
-http://openframeworks.cc/
+http://openframeworks.cc/  
 http://damien.douxchamps.net/ieee1394/libdc1394/
 
 It avoids unnecessary threading by using libdc1394's non-blocking image grabbing, which means you can call grabVideo without worrying about it slowing down your application.
