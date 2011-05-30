@@ -9,6 +9,6 @@ public:
 	void update();
 	void draw();
 	
-	ofxLibdc camera;
+	ofxLibdc::Camera camera;
 	ofImage curFrame;
 };

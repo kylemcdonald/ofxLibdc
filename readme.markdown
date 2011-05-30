@@ -12,7 +12,7 @@ A minimal example of grabbing with ofxLibdc looks like:
 	#include "ofxLibdc.h"
 	class testApp : public ofBaseApp {
 	public:
-		ofxLibdc camera;
+		ofxLibdc::Camera camera;
 		ofImage curFrame;
 		void setup() {
 			camera.setup();

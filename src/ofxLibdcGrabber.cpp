@@ -1,50 +1,52 @@
 #include "ofxLibdcGrabber.h"
 
-ofxLibdcGrabber::ofxLibdcGrabber() :
+namespace ofxLibdc {
+
+Grabber::Grabber() :
 	newFrame(false) {
 }
 
-ofTexture& ofxLibdcGrabber::getTextureReference() {
+ofTexture& Grabber::getTextureReference() {
 	return buffer.getTextureReference();
 }
 
-void ofxLibdcGrabber::setUseTexture(bool useTexture) {
+void Grabber::setUseTexture(bool useTexture) {
 	buffer.setUseTexture(useTexture);
 }
 
-unsigned char* ofxLibdcGrabber::getPixels() {
+unsigned char* Grabber::getPixels() {
 	return buffer.getPixels();
 }
 
-ofImage& ofxLibdcGrabber::getBuffer() {
+ofImage& Grabber::getBuffer() {
 	return buffer;
 }
 
-void ofxLibdcGrabber::update() {
+void Grabber::update() {
 	grabFrame();
 }
 
-void ofxLibdcGrabber::grabFrame() {
+void Grabber::grabFrame() {
 	newFrame = grabVideo(buffer);
 }
 
-void ofxLibdcGrabber::draw(float x, float y) {
+void Grabber::draw(float x, float y) {
 	buffer.draw(x, y);
 }
 
-void ofxLibdcGrabber::draw(float x, float y, float w, float h) {
+void Grabber::draw(float x, float y, float w, float h) {
 	buffer.draw(x, y, w, h);
 }
 
-float ofxLibdcGrabber::getWidth() {
-	return ofxLibdc::getWidth();
+float Grabber::getWidth() {
+	return Camera::getWidth();
 }
 
-float ofxLibdcGrabber::getHeight() {
-	return ofxLibdc::getHeight();
+float Grabber::getHeight() {
+	return Camera::getHeight();
 }
 
-bool ofxLibdcGrabber::isFrameNew() {
+bool Grabber::isFrameNew() {
 	if(newFrame) {
 		newFrame = false;
 		return true;
@@ -52,6 +54,8 @@ bool ofxLibdcGrabber::isFrameNew() {
 	return false;
 }
 
-void ofxLibdcGrabber::close() {
-	// handled by ~ofxLibdc
+void Grabber::close() {
+	// handled automatically by ~Camera
+}
+
 }

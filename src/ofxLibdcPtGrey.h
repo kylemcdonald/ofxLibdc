@@ -1,9 +1,9 @@
 /*
- ofxLibdcPtGrey extends ofxLibdcGrabber, meaning you can use either the
- common ofBaseVideo style grabFrame()/isFrameNew() or the ofxLibdc style
+ ofxLibdc::PointGrey extends ofxLibdc::Grabber, meaning you can use either the
+ traditional ofBaseVideo style grabFrame()/isFrameNew() or the ofxLibdc style
  grabVideo(ofImage).
  
- ofxLibdcPtGrey wraps some functionality specific to Point Grey cameras.
+ ofxLibdc::PointGrey wraps some functionality specific to Point Grey cameras.
  For example, you can embed and retrieve frame-specifc information in the
  returned pixels using setEmbeddedInfo() and getEmbeddedInfo().
  
@@ -18,6 +18,8 @@
 #pragma once
 
 #include "ofxLibdcGrabber.h"
+
+namespace ofxLibdc {
 
 #define PTGREY_FRAME_RATE_INQ 0x53c
 #define PTGREY_FRAME_RATE 0x83c
@@ -45,7 +47,7 @@ enum ptGreyEmbed {
 	PTGREY_EMBED_ROI
 };
 
-class ofxLibdcPtGrey : public ofxLibdcGrabber {
+class PointGrey : public Grabber {
 public:
 	void setupAlternatingStrobe();
 	
@@ -60,3 +62,5 @@ public:
 protected:
 	unsigned int getEmbeddedInfoOffset(int embeddedInfo) const;
 };
+
+}

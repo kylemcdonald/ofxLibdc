@@ -1,5 +1,7 @@
 #include "ofxLibdcPtGrey.h"
 
+namespace ofxLibdc {
+
 #define readBits(x, pos, len) ((x >> (pos - len)) & ((1 << len) - 1))
 
 /*
@@ -8,7 +10,7 @@
  http://www.ptgrey.com/support/downloads/documents/TAN2005003_Output_variable_pattern_strobe_pulse.pdf
  http://www.ptgrey.com/support/downloads/documents/TAN2005002_Output_strobe_signal_pulse.pdf
  */
-void ofxLibdcPtGrey::setupAlternatingStrobe() {	
+void PointGrey::setupAlternatingStrobe() {	
 	if(camera) {
 		// put GPIO 0 and 1 in dcam output mode
 		dc1394_set_control_register(camera, PTGREY_GPIO_CTRL_PIN_0, 0x80080000);
@@ -34,13 +36,13 @@ void ofxLibdcPtGrey::setupAlternatingStrobe() {
 	}
 }
 
-void ofxLibdcPtGrey::clearEmbeddedInfo() {
+void PointGrey::clearEmbeddedInfo() {
 	if(camera) {
 		dc1394_set_control_register(camera, PTGREY_FRAME_INFO, 0x80000000);
 	}
 }
 
-void ofxLibdcPtGrey::setEmbeddedInfo(int embeddedInfo, bool enable) {
+void PointGrey::setEmbeddedInfo(int embeddedInfo, bool enable) {
 	if(camera) {
 		unsigned int reg;
 		dc1394_get_control_register(camera, PTGREY_FRAME_INFO, &reg);
@@ -52,7 +54,7 @@ void ofxLibdcPtGrey::setEmbeddedInfo(int embeddedInfo, bool enable) {
 	}
 }
 
-void ofxLibdcPtGrey::setMaxFramerate() {
+void PointGrey::setMaxFramerate() {
 	if(camera && useFormat7) {
 		unsigned int framerateInq;
 		dc1394_get_control_register(camera, PTGREY_FRAME_RATE_INQ, &framerateInq);
@@ -62,7 +64,7 @@ void ofxLibdcPtGrey::setMaxFramerate() {
 	}
 }
 
-unsigned int ofxLibdcPtGrey::getEmbeddedInfoOffset(int embeddedInfo) const {
+unsigned int PointGrey::getEmbeddedInfoOffset(int embeddedInfo) const {
 	if(camera) {
 		unsigned int reg;
 		dc1394_get_control_register(camera, PTGREY_FRAME_INFO, &reg);
@@ -76,7 +78,7 @@ unsigned int ofxLibdcPtGrey::getEmbeddedInfoOffset(int embeddedInfo) const {
 	}
 }
 
-unsigned int ofxLibdcPtGrey::getEmbeddedInfo(unsigned char* pixels, int embeddedInfo) const {
+unsigned int PointGrey::getEmbeddedInfo(unsigned char* pixels, int embeddedInfo) const {
 	if(camera) {
 		unsigned int offset = getEmbeddedInfoOffset(embeddedInfo);
 		return ((unsigned int*) pixels)[offset];
@@ -85,7 +87,7 @@ unsigned int ofxLibdcPtGrey::getEmbeddedInfo(unsigned char* pixels, int embedded
 	}
 }
 
-void ofxLibdcPtGrey::getEmbeddedPosition(unsigned char* pixels, unsigned short* left, unsigned short* top) const {
+void PointGrey::getEmbeddedPosition(unsigned char* pixels, unsigned short* left, unsigned short* top) const {
 	if(camera) {
 		unsigned int value = getEmbeddedInfo(pixels, PTGREY_EMBED_ROI);
 		unsigned char* pv = (unsigned char*) &value;
@@ -94,7 +96,7 @@ void ofxLibdcPtGrey::getEmbeddedPosition(unsigned char* pixels, unsigned short* 
 	}
 }
 
-unsigned int ofxLibdcPtGrey::getEmbeddedStrobeCounter(unsigned char* pixels) const {
+unsigned int PointGrey::getEmbeddedStrobeCounter(unsigned char* pixels) const {
 	if(camera) {
 		unsigned int value = getEmbeddedInfo(pixels, PTGREY_EMBED_STROBE_PATTERN);
 		unsigned char* pv = (unsigned char*) &value;
@@ -102,4 +104,6 @@ unsigned int ofxLibdcPtGrey::getEmbeddedStrobeCounter(unsigned char* pixels) con
 	} else {
 		return 0;
 	}
+}
+
 }

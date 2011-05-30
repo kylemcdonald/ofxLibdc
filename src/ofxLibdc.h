@@ -3,11 +3,15 @@
 #include "ofMain.h"
 #include "dc1394.h"
 
+// This sets the number of images in the DMA buffer,
+// where libdc stores images until you grab them.
 #define OFXLIBDC_BUFFER_SIZE 4
 
-class ofxLibdc {
+namespace ofxLibdc {
+
+class Camera {
 public:
-	ofxLibdc();
+	Camera();
 	static int getCameraCount();
 	
 	// pre-setup settings
@@ -20,7 +24,7 @@ public:
 	
 	virtual bool setup(int cameraNumber = 0);
 	virtual bool setup(string cameraGuid);
-	virtual ~ofxLibdc();
+	virtual ~Camera();
 	
 	// post-setup settings
 	void setBrightness(unsigned int brightness);
@@ -103,3 +107,5 @@ protected:
 	
 	string makeString(int name);
 };
+
+}

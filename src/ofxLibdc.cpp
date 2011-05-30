@@ -1,9 +1,11 @@
 #include "ofxLibdc.h"
 
-dc1394_t* ofxLibdc::libdcContext = NULL;
-int ofxLibdc::libdcCameras = 0;
+namespace ofxLibdc {
 
-ofxLibdc::ofxLibdc() :
+dc1394_t* Camera::libdcContext = NULL;
+int Camera::libdcCameras = 0;
+
+Camera::Camera() :
 		camera(NULL),
 		imageType(OF_IMAGE_GRAYSCALE),
 		useFormat7(false),
@@ -17,7 +19,7 @@ ofxLibdc::ofxLibdc() :
 	startLibdcContext();
 }
 
-ofxLibdc::~ofxLibdc() {
+Camera::~Camera() {
 	if(camera != NULL) {
 		dc1394_capture_stop(camera);
 		setTransmit(false);
@@ -26,11 +28,11 @@ ofxLibdc::~ofxLibdc() {
 	stopLibdcContext();
 }
 
-void ofxLibdc::setBlocking(bool blocking) {
+void Camera::setBlocking(bool blocking) {
 	capturePolicy = blocking ? DC1394_CAPTURE_POLICY_WAIT : DC1394_CAPTURE_POLICY_POLL;
 }
 
-void ofxLibdc::startLibdcContext() {
+void Camera::startLibdcContext() {
 	if(libdcCameras == 0) {
 		ofLog(OF_LOG_VERBOSE, "Creating libdc1394 context with dc1394_new().");
 		libdcContext = dc1394_new();
@@ -38,7 +40,7 @@ void ofxLibdc::startLibdcContext() {
 	libdcCameras++;
 }
 
-void ofxLibdc::stopLibdcContext() {
+void Camera::stopLibdcContext() {
 	libdcCameras--;
 	if(libdcCameras == 0) {
 		ofLog(OF_LOG_VERBOSE, "No more cameras, destroying libdc1394 context.");
@@ -46,7 +48,7 @@ void ofxLibdc::stopLibdcContext() {
 	}
 }
 
-int ofxLibdc::getOfImageType(dc1394color_coding_t libdcType) {
+int Camera::getOfImageType(dc1394color_coding_t libdcType) {
 	switch(libdcType) {
 		case DC1394_COLOR_CODING_MONO8: return OF_IMAGE_GRAYSCALE;
 		case DC1394_COLOR_CODING_RGB8: return OF_IMAGE_COLOR;
@@ -54,7 +56,7 @@ int ofxLibdc::getOfImageType(dc1394color_coding_t libdcType) {
 	}
 }
 
-dc1394color_coding_t ofxLibdc::getLibdcType(int ofImageType) {
+dc1394color_coding_t Camera::getLibdcType(int ofImageType) {
 	switch(ofImageType) {
 		case OF_IMAGE_GRAYSCALE: return DC1394_COLOR_CODING_MONO8;
 		case OF_IMAGE_COLOR: return DC1394_COLOR_CODING_RGB8;
@@ -62,7 +64,7 @@ dc1394color_coding_t ofxLibdc::getLibdcType(int ofImageType) {
 	}
 }
 
-int ofxLibdc::getCameraCount() {
+int Camera::getCameraCount() {
 	dc1394camera_list_t* list;
 	dc1394_camera_enumerate(libdcContext, &list);
 	int cameraCount = list->num;
@@ -70,7 +72,7 @@ int ofxLibdc::getCameraCount() {
 	return cameraCount;
 }
 
-void ofxLibdc::setFormat7(bool useFormat7, int mode) {
+void Camera::setFormat7(bool useFormat7, int mode) {
 	bool changed = useFormat7 != this->useFormat7 || mode != this->format7Mode;
 	this->useFormat7 = useFormat7;
 	this->format7Mode = mode;
@@ -78,7 +80,7 @@ void ofxLibdc::setFormat7(bool useFormat7, int mode) {
 		applySettings();
 }
 
-void ofxLibdc::set1394b(bool use1394b) {
+void Camera::set1394b(bool use1394b) {
 	bool changed = use1394b != this->use1394b; 
 	this->use1394b = use1394b;
 	if(camera && changed)
@@ -86,7 +88,7 @@ void ofxLibdc::set1394b(bool use1394b) {
 }
 
 // todo: add an error message if you set an invalid (too big) size
-void ofxLibdc::setSize(unsigned int width, unsigned int height) {
+void Camera::setSize(unsigned int width, unsigned int height) {
 	bool changed = width != this->width || height != this->height; 
 	this->width = width;
 	this->height = height;
@@ -95,7 +97,7 @@ void ofxLibdc::setSize(unsigned int width, unsigned int height) {
 }
 
 // todo: add an error message if you set an invalid (out of bounds) position
-void ofxLibdc::setPosition(unsigned int left, unsigned int top) {
+void Camera::setPosition(unsigned int left, unsigned int top) {
 	bool changed = left != this->left || top != this->top; 
 	this->left = left;
 	this->top = top;
@@ -105,7 +107,7 @@ void ofxLibdc::setPosition(unsigned int left, unsigned int top) {
 	}
 }
 
-bool ofxLibdc::setup(int cameraNumber) {
+bool Camera::setup(int cameraNumber) {
 	dc1394camera_list_t* list;
 	dc1394_camera_enumerate(libdcContext, &list);
 	if(list->num == 0) {
@@ -117,14 +119,14 @@ bool ofxLibdc::setup(int cameraNumber) {
 	return initCamera(cameraGuid) && applySettings();
 }
 
-bool ofxLibdc::setup(string cameraGuid) {
+bool Camera::setup(string cameraGuid) {
 	uint64_t cameraGuidInt;
 	istringstream ss(cameraGuid);
 	ss >> hex >> cameraGuidInt;
 	return initCamera(cameraGuidInt) && applySettings();
 }
 
-bool ofxLibdc::initCamera(uint64_t cameraGuid) {
+bool Camera::initCamera(uint64_t cameraGuid) {
 	// create camera struct
 	camera = dc1394_camera_new(libdcContext, cameraGuid);
 	if (!camera) {
@@ -151,7 +153,7 @@ bool ofxLibdc::initCamera(uint64_t cameraGuid) {
 	return true;
 }
 
-bool ofxLibdc::applySettings() {
+bool Camera::applySettings() {
 	if(camera)
 		dc1394_capture_stop(camera);
 		
@@ -240,7 +242,7 @@ bool ofxLibdc::applySettings() {
 	return true;
 }
 
-void ofxLibdc::quantizePosition() {
+void Camera::quantizePosition() {
 	if(camera) {
 		unsigned int hunit, vunit;
 		dc1394_format7_get_unit_position(camera, videoMode, &hunit, &vunit);
@@ -249,7 +251,7 @@ void ofxLibdc::quantizePosition() {
 	}
 }
 
-void ofxLibdc::quantizeSize() {
+void Camera::quantizeSize() {
 	if(camera) {
 		unsigned int hunit, vunit;
 		dc1394_format7_get_unit_size(camera, videoMode, &hunit, &vunit);
@@ -258,7 +260,7 @@ void ofxLibdc::quantizeSize() {
 	}
 }
 
-void ofxLibdc::printFeatures() const {
+void Camera::printFeatures() const {
 	dc1394featureset_t features;
 	if(camera) {
 		dc1394_feature_get_all(camera, &features);
@@ -266,47 +268,47 @@ void ofxLibdc::printFeatures() const {
 	}
 }
 
-void ofxLibdc::setBrightness(unsigned int brightness) {
+void Camera::setBrightness(unsigned int brightness) {
 	setFeature(DC1394_FEATURE_BRIGHTNESS, brightness);
 }
 
-void ofxLibdc::setGamma(unsigned int gamma) {
+void Camera::setGamma(unsigned int gamma) {
 	setFeature(DC1394_FEATURE_GAMMA, gamma);
 }
 
-void ofxLibdc::setGain(unsigned int gain) {
+void Camera::setGain(unsigned int gain) {
 	setFeature(DC1394_FEATURE_GAIN, gain);
 }
 
-void ofxLibdc::setExposure(unsigned int exposure) {
+void Camera::setExposure(unsigned int exposure) {
 	setFeature(DC1394_FEATURE_EXPOSURE, exposure);
 }
 
-void ofxLibdc::setShutter(unsigned int shutter) {
+void Camera::setShutter(unsigned int shutter) {
 	setFeature(DC1394_FEATURE_SHUTTER, shutter);
 }
 
-void ofxLibdc::setBrightnessNorm(float brightness) {
+void Camera::setBrightnessNorm(float brightness) {
 	setFeatureNorm(DC1394_FEATURE_BRIGHTNESS, brightness);
 }
 
-void ofxLibdc::setGammaNorm(float gamma) {
+void Camera::setGammaNorm(float gamma) {
 	setFeatureNorm(DC1394_FEATURE_GAMMA, gamma);
 }
 
-void ofxLibdc::setGainNorm(float gain) {
+void Camera::setGainNorm(float gain) {
 	setFeatureNorm(DC1394_FEATURE_GAIN, gain);
 }
 
-void ofxLibdc::setExposureNorm(float exposure) {
+void Camera::setExposureNorm(float exposure) {
 	setFeatureNorm(DC1394_FEATURE_EXPOSURE, exposure);
 }
 
-void ofxLibdc::setShutterNorm(float shutter) {
+void Camera::setShutterNorm(float shutter) {
 	setFeatureNorm(DC1394_FEATURE_SHUTTER, shutter);
 }
 
-inline void ofxLibdc::setFeature(dc1394feature_t feature, unsigned int value) {
+inline void Camera::setFeature(dc1394feature_t feature, unsigned int value) {
 	if(camera) {
 		dc1394_feature_set_power(camera, feature, DC1394_ON);
 		dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
@@ -314,7 +316,7 @@ inline void ofxLibdc::setFeature(dc1394feature_t feature, unsigned int value) {
 	}
 }
 
-void ofxLibdc::setFeatureNorm(dc1394feature_t feature, float value) {
+void Camera::setFeatureNorm(dc1394feature_t feature, float value) {
 	if(camera) {
 		unsigned int min, max;
 		getFeatureRange(feature, &min, &max);
@@ -324,53 +326,53 @@ void ofxLibdc::setFeatureNorm(dc1394feature_t feature, float value) {
 	}
 }
 
-void ofxLibdc::getBrightnessRange(unsigned int* min, unsigned int* max) const {
+void Camera::getBrightnessRange(unsigned int* min, unsigned int* max) const {
 	getFeatureRange(DC1394_FEATURE_BRIGHTNESS, min, max);
 }
 
-void ofxLibdc::getGammaRange(unsigned int* min, unsigned int* max) const {
+void Camera::getGammaRange(unsigned int* min, unsigned int* max) const {
 	getFeatureRange(DC1394_FEATURE_GAMMA, min, max);
 }
 
-void ofxLibdc::getGainRange(unsigned int* min, unsigned int* max) const {
+void Camera::getGainRange(unsigned int* min, unsigned int* max) const {
 	getFeatureRange(DC1394_FEATURE_GAIN, min, max);
 }
 
-void ofxLibdc::getExposureRange(unsigned int* min, unsigned int* max) const {
+void Camera::getExposureRange(unsigned int* min, unsigned int* max) const {
 	getFeatureRange(DC1394_FEATURE_EXPOSURE, min, max);
 }
 
-void ofxLibdc::getShutterRange(unsigned int* min, unsigned int* max) const {
+void Camera::getShutterRange(unsigned int* min, unsigned int* max) const {
 	getFeatureRange(DC1394_FEATURE_SHUTTER, min, max);
 }
 
-void ofxLibdc::getFeatureRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const {
+void Camera::getFeatureRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const {
 	if(camera) {
 		dc1394_feature_get_boundaries(camera, feature, min, max);
 	}
 }
 
-unsigned int ofxLibdc::getBrightness() {
+unsigned int Camera::getBrightness() {
 	return getFeature(DC1394_FEATURE_BRIGHTNESS);
 }
 
-unsigned int ofxLibdc::getGamma() {
+unsigned int Camera::getGamma() {
 	return getFeature(DC1394_FEATURE_GAMMA);
 }
 
-unsigned int ofxLibdc::getGain() {
+unsigned int Camera::getGain() {
 	return getFeature(DC1394_FEATURE_GAIN);
 }
 
-unsigned int ofxLibdc::getExposure() {
+unsigned int Camera::getExposure() {
 	return getFeature(DC1394_FEATURE_EXPOSURE);
 }
 
-unsigned int ofxLibdc::getShutter() {
+unsigned int Camera::getShutter() {
 	return getFeature(DC1394_FEATURE_SHUTTER);
 }
 
-unsigned int ofxLibdc::getFeature(dc1394feature_t feature) {
+unsigned int Camera::getFeature(dc1394feature_t feature) {
 	unsigned int value = 0;
 	if(camera) {
 		dc1394_feature_get_value(camera, feature, &value);
@@ -378,38 +380,38 @@ unsigned int ofxLibdc::getFeature(dc1394feature_t feature) {
 	return value;
 }
 
-float ofxLibdc::getBrightnessNorm() {
+float Camera::getBrightnessNorm() {
 	return getFeatureNorm(DC1394_FEATURE_BRIGHTNESS);
 }
 
-float ofxLibdc::getGammaNorm() {
+float Camera::getGammaNorm() {
 	return getFeatureNorm(DC1394_FEATURE_GAMMA);
 }
 
-float ofxLibdc::getGainNorm() {
+float Camera::getGainNorm() {
 	return getFeatureNorm(DC1394_FEATURE_GAIN);
 }
 
-float ofxLibdc::getExposureNorm() {
+float Camera::getExposureNorm() {
 	return getFeatureNorm(DC1394_FEATURE_EXPOSURE);
 }
 
-float ofxLibdc::getShutterNorm() {
+float Camera::getShutterNorm() {
 	return getFeatureNorm(DC1394_FEATURE_SHUTTER);
 }
 
-float ofxLibdc::getFeatureNorm(dc1394feature_t feature) {
+float Camera::getFeatureNorm(dc1394feature_t feature) {
 	unsigned int value = getFeature(feature);
 	unsigned int min, max;
 	getFeatureRange(feature, &min, &max);
 	return ((float) value - min) / (max - min);
 }
 
-float ofxLibdc::getShutterAbs() const {
+float Camera::getShutterAbs() const {
 	return getFeatureAbs(DC1394_FEATURE_SHUTTER);
 }
 
-float ofxLibdc::getFeatureAbs(dc1394feature_t feature) const {
+float Camera::getFeatureAbs(dc1394feature_t feature) const {
 	float value = 0;
 	if(camera) {
 		dc1394_feature_get_absolute_value(camera, feature, &value);
@@ -417,23 +419,23 @@ float ofxLibdc::getFeatureAbs(dc1394feature_t feature) const {
 	return value;
 }
 
-unsigned int ofxLibdc::getWidth() const {
+unsigned int Camera::getWidth() const {
 	return width;
 }
 
-unsigned int ofxLibdc::getHeight() const {
+unsigned int Camera::getHeight() const {
 	return height;
 }
 
-int ofxLibdc::getImageType() const {
+int Camera::getImageType() const {
 	return imageType;
 }
 
-void ofxLibdc::setImageType(int imageType) {
+void Camera::setImageType(int imageType) {
 	this->imageType = imageType;
 }
 
-void ofxLibdc::setTransmit(bool transmit) {
+void Camera::setTransmit(bool transmit) {
 	if(camera) {
 		dc1394switch_t cur, target;
 		dc1394_video_get_transmission(camera, &cur);
@@ -443,7 +445,7 @@ void ofxLibdc::setTransmit(bool transmit) {
 	}
 }
 
-void ofxLibdc::grabStill(ofImage& img) {
+void Camera::grabStill(ofImage& img) {
 	if(camera) {
 		setTransmit(false);
 		flushBuffer();
@@ -460,7 +462,7 @@ void ofxLibdc::grabStill(ofImage& img) {
 	}
 }
 
-bool ofxLibdc::grabVideo(ofImage& img, bool dropFrames) {
+bool Camera::grabVideo(ofImage& img, bool dropFrames) {
 	if(camera) {
 		setTransmit(true);
 		// don't trust allocate() to be smart
@@ -485,7 +487,7 @@ bool ofxLibdc::grabVideo(ofImage& img, bool dropFrames) {
 	}
 }
 
-bool ofxLibdc::grabFrame(ofImage& img) {
+bool Camera::grabFrame(ofImage& img) {
 	if(camera) {
 		dc1394video_frame_t *frame;
 		dc1394_capture_dequeue(camera, capturePolicy, &frame);
@@ -504,7 +506,7 @@ bool ofxLibdc::grabFrame(ofImage& img) {
 	}
 }
 
-void ofxLibdc::flushBuffer() {
+void Camera::flushBuffer() {
 	if(camera) {
 		dc1394video_frame_t *frame;
 		do {
@@ -515,11 +517,11 @@ void ofxLibdc::flushBuffer() {
 	}
 }
 
-dc1394camera_t* ofxLibdc::getLibdcCamera() {
+dc1394camera_t* Camera::getLibdcCamera() {
 	return camera;
 }
 
-bool ofxLibdc::ready() const {
+bool Camera::ready() const {
 	return camera != NULL;
 }
 
@@ -533,7 +535,7 @@ bool ofxLibdc::ready() const {
  */
 #define enumCase( name ) {case name: return # name; break;}
 
-string ofxLibdc::makeString(int name) {
+string Camera::makeString(int name) {
 	switch(name) {
 		enumCase(DC1394_COLOR_CODING_MONO8)
 		enumCase(DC1394_COLOR_CODING_YUV411)
@@ -554,4 +556,6 @@ string ofxLibdc::makeString(int name) {
 		enumCase(DC1394_FRAMERATE_120)
 		enumCase(DC1394_FRAMERATE_240)
 	}
+}
+
 }
