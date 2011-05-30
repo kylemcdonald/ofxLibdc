@@ -454,9 +454,13 @@ void Camera::grabStill(ofImage& img) {
 		dc1394video_frame_t *frame;
 		dc1394_capture_dequeue(camera, capturePolicy, &frame);
 		img.allocate(width, height, imageType);
+		unsigned char* src = frame->image;
+		unsigned char* dst = img.getPixels();
 		if(imageType == OF_IMAGE_GRAYSCALE) {
-			memcpy(img.getPixels(), frame->image, width * height);
+			memcpy(dst, src, width * height);
 		} else if(imageType == OF_IMAGE_COLOR) {
+			unsigned int bits = width * height * img.getPixelsRef().getBitsPerPixel();
+			dc1394_convert_to_RGB8(src, dst, width, height, 0, getLibdcType(imageType), bits);
 		}
 		dc1394_capture_enqueue(camera, frame);
 	}
@@ -492,9 +496,13 @@ bool Camera::grabFrame(ofImage& img) {
 		dc1394video_frame_t *frame;
 		dc1394_capture_dequeue(camera, capturePolicy, &frame);
 		if(frame != NULL) {
+			unsigned char* src = frame->image;
+			unsigned char* dst = img.getPixels();
 			if(imageType == OF_IMAGE_GRAYSCALE) {
-				memcpy(img.getPixels(), frame->image, width * height);
+				memcpy(dst, src, width * height);
 			} else if(imageType == OF_IMAGE_COLOR) {
+				unsigned int bits = width * height * img.getPixelsRef().getBitsPerPixel();
+				dc1394_convert_to_RGB8(src, dst, width, height, 0, getLibdcType(imageType), bits);
 			}
 			dc1394_capture_enqueue(camera, frame);
 			return true;
