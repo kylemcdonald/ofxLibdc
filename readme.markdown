@@ -1,4 +1,4 @@
-ofxLibdc is an Open Frameworks wrapper for libdc1394 that makes it easy to grab images from libdc1394-compatible cameras.
+* ofxLibdc is an Open Frameworks wrapper for libdc1394 that makes it easy to grab images from libdc1394-compatible cameras.
 
 http://openframeworks.cc/
 http://damien.douxchamps.net/ieee1394/libdc1394/
@@ -9,22 +9,22 @@ Instead of copying the image to an internal buffer before giving it to you, ofxL
 
 A minimal example of grabbing with ofxLibdc looks like:
 
-#include "ofxLibdc.h"
-class testApp : public ofBaseApp {
-public:
-	ofxLibdc camera;
-	ofImage curFrame;
-	void setup() {
-		camera.setup();
-	}
-	void update() {
-		if(camera.grabVideo(curFrame))
-			curFrame.update();
-	}
-	void draw() {
-		curFrame.draw(0, 0);
-	}
-};
+	#include "ofxLibdc.h"
+	class testApp : public ofBaseApp {
+	public:
+		ofxLibdc camera;
+		ofImage curFrame;
+		void setup() {
+			camera.setup();
+		}
+		void update() {
+			if(camera.grabVideo(curFrame))
+				curFrame.update();
+		}
+		void draw() {
+			curFrame.draw(0, 0);
+		}
+	};
 
 Because there is no separate capture thread, there is no overhead from copying images you don't need.
 
