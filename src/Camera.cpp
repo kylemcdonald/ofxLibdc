@@ -450,29 +450,13 @@ void Camera::grabStill(ofImage& img) {
 		setTransmit(false);
 		flushBuffer();
 		dc1394_video_set_one_shot(camera, DC1394_ON);
-		// if possible, the following should be replaced with a call to grabFrame
-		dc1394video_frame_t *frame;
-		dc1394_capture_dequeue(camera, capturePolicy, &frame);
-		img.allocate(width, height, imageType);
-		unsigned char* src = frame->image;
-		unsigned char* dst = img.getPixels();
-		if(imageType == OF_IMAGE_GRAYSCALE) {
-			memcpy(dst, src, width * height);
-		} else if(imageType == OF_IMAGE_COLOR) {
-			unsigned int bits = width * height * img.getPixelsRef().getBitsPerPixel();
-			dc1394_convert_to_RGB8(src, dst, width, height, 0, getLibdcType(imageType), bits);
-		}
-		dc1394_capture_enqueue(camera, frame);
+		grabFrame(img);
 	}
 }
 
 bool Camera::grabVideo(ofImage& img, bool dropFrames) {
 	if(camera) {
 		setTransmit(true);
-		// don't trust allocate() to be smart
-		if(img.getWidth() != width || img.getHeight() != height) {
-			img.allocate(width, height, imageType);
-		}
 		if(dropFrames) {
 			bool remaining;
 			int i = 0;
@@ -496,6 +480,10 @@ bool Camera::grabFrame(ofImage& img) {
 		dc1394video_frame_t *frame;
 		dc1394_capture_dequeue(camera, capturePolicy, &frame);
 		if(frame != NULL) {
+			// don't trust allocate() to be smart. should also check for imageType change.
+			if(img.getWidth() != width || img.getHeight() != height) {
+				img.allocate(width, height, imageType);
+			}
 			unsigned char* src = frame->image;
 			unsigned char* dst = img.getPixels();
 			if(imageType == OF_IMAGE_GRAYSCALE) {
