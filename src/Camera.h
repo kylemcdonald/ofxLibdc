@@ -17,7 +17,7 @@ public:
 	// pre-setup settings
 	void setSize(unsigned int width, unsigned int height);
 	void setPosition(unsigned int roiLeft, unsigned int roiTop);
-	void setImageType(int imageType);
+	void setImageType(ofImageType imageType);
 	void setFormat7(bool useFormat7, int mode = 0);
 	void set1394b(bool use1394b);
 	void setBlocking(bool blocking);
@@ -72,7 +72,7 @@ public:
 		
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
-	int getImageType() const;
+	ofImageType getImageType() const;
 	void printFeatures() const;
 	
 	dc1394camera_t* getLibdcCamera();
@@ -84,14 +84,14 @@ protected:
 	static void startLibdcContext();
 	static void stopLibdcContext();
 	
-	static int getOfImageType(dc1394color_coding_t libdcType);
-	static dc1394color_coding_t getLibdcType(int ofImageType);
+	static ofImageType getOfImageType(dc1394color_coding_t imageType);
+	static dc1394color_coding_t getLibdcType(ofImageType imageType);
 		
 	dc1394camera_t* camera;
 	dc1394video_mode_t videoMode;
 	dc1394capture_policy_t capturePolicy;
 	unsigned int width, height, left, top;
-	int imageType;
+	ofImageType imageType;
 	bool useFormat7;
 	int format7Mode;
 	bool use1394b;

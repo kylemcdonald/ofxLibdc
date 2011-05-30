@@ -48,16 +48,16 @@ void Camera::stopLibdcContext() {
 	}
 }
 
-int Camera::getOfImageType(dc1394color_coding_t libdcType) {
-	switch(libdcType) {
+ofImageType Camera::getOfImageType(dc1394color_coding_t imageType) {
+	switch(imageType) {
 		case DC1394_COLOR_CODING_MONO8: return OF_IMAGE_GRAYSCALE;
 		case DC1394_COLOR_CODING_RGB8: return OF_IMAGE_COLOR;
 		default: return OF_IMAGE_COLOR;
 	}
 }
 
-dc1394color_coding_t Camera::getLibdcType(int ofImageType) {
-	switch(ofImageType) {
+dc1394color_coding_t Camera::getLibdcType(ofImageType imageType) {
+	switch(imageType) {
 		case OF_IMAGE_GRAYSCALE: return DC1394_COLOR_CODING_MONO8;
 		case OF_IMAGE_COLOR: return DC1394_COLOR_CODING_RGB8;
 		default: return DC1394_COLOR_CODING_RGB8;
@@ -427,11 +427,11 @@ unsigned int Camera::getHeight() const {
 	return height;
 }
 
-int Camera::getImageType() const {
+ofImageType Camera::getImageType() const {
 	return imageType;
 }
 
-void Camera::setImageType(int imageType) {
+void Camera::setImageType(ofImageType imageType) {
 	this->imageType = imageType;
 }
 
