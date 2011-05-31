@@ -14,6 +14,8 @@ Camera::Camera() :
 		height(480),
 		left(0),
 		top(0),
+		useBayer(false),
+		bayerMode(DC1394_COLOR_FILTER_RGGB),
 		format7Mode(0),
 		capturePolicy(DC1394_CAPTURE_POLICY_POLL) {
 	startLibdcContext();
@@ -26,6 +28,12 @@ Camera::~Camera() {
 		dc1394_camera_free(camera);
 	}
 	stopLibdcContext();
+}
+
+void Camera::setBayerMode(dc1394color_filter_t bayerMode){
+	setImageType(OF_IMAGE_COLOR);
+	this->bayerMode = bayerMode;
+	useBayer = true;
 }
 
 void Camera::setBlocking(bool blocking) {
@@ -179,6 +187,10 @@ bool Camera::applySettings() {
 		dc1394_video_get_supported_modes(camera, &video_modes);
 		dc1394color_coding_t targetCoding = getLibdcType(imageType);
 		
+		if( useBayer ){
+			targetCoding = DC1394_COLOR_CODING_MONO8;
+		}
+		
 		float bestDistance = 0;
 		dc1394video_mode_t bestMode;
 		bool found = false;
@@ -187,11 +199,13 @@ bool Camera::applySettings() {
 				dc1394video_mode_t curMode = video_modes.modes[i];
 				unsigned int curWidth, curHeight;
 				dc1394_get_image_size_from_video_mode(camera, curMode, &curWidth, &curHeight);
-				ofLog(OF_LOG_VERBOSE,
-					  "Camera mode " + ofToString(i) + ": " + makeString(targetCoding) + " " +
-					  ofToString((int) curWidth) + "x" + ofToString((int) curHeight));
+
 				dc1394color_coding_t curCoding;
 				dc1394_get_color_coding_from_video_mode(camera, curMode, &curCoding);
+
+				ofLog(OF_LOG_VERBOSE,
+					  "Camera mode " + ofToString(i) + ": " + makeString(curCoding) + " " +
+					  ofToString((int) curWidth) + "x" + ofToString((int) curHeight));
 				if(curCoding == targetCoding) {
 					float curDistance = ofDist(curWidth, curHeight, width, height);
 					if(!found || curDistance < bestDistance) {
@@ -490,7 +504,12 @@ bool Camera::grabFrame(ofImage& img) {
 				memcpy(dst, src, width * height);
 			} else if(imageType == OF_IMAGE_COLOR) {
 				unsigned int bits = width * height * img.getPixelsRef().getBitsPerPixel();
-				dc1394_convert_to_RGB8(src, dst, width, height, 0, getLibdcType(imageType), bits);
+				
+				if( useBayer ){
+					dc1394_bayer_decoding_8bit(src, dst, width, height, bayerMode, DC1394_BAYER_METHOD_BILINEAR);
+				}else{
+					dc1394_convert_to_RGB8(src, dst, width, height, 0, getLibdcType(imageType), bits);
+				}
 			}
 			dc1394_capture_enqueue(camera, frame);
 			return true;

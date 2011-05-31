@@ -21,6 +21,7 @@ public:
 	void setFormat7(bool useFormat7, int mode = 0);
 	void set1394b(bool use1394b);
 	void setBlocking(bool blocking);
+	void setBayerMode(dc1394color_filter_t bayerMode); 
 	
 	virtual bool setup(int cameraNumber = 0);
 	virtual bool setup(string cameraGuid);
@@ -92,6 +93,10 @@ protected:
 	dc1394capture_policy_t capturePolicy;
 	unsigned int width, height, left, top;
 	ofImageType imageType;
+	
+	bool useBayer;
+	dc1394color_filter_t bayerMode;
+	
 	bool useFormat7;
 	int format7Mode;
 	bool use1394b;
