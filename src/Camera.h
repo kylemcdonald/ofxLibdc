@@ -78,12 +78,20 @@ public:
 	unsigned int getFeatureRaw(dc1394feature_t feature) const;
 	
 	// raw value ranges
-	void getBrightnessRange(unsigned int* min, unsigned int* max) const;
-	void getGammaRange(unsigned int* min, unsigned int* max) const;
-	void getGainRange(unsigned int* min, unsigned int* max) const;
-	void getExposureRange(unsigned int* min, unsigned int* max) const;
-	void getShutterRange(unsigned int* min, unsigned int* max) const;
-	void getFeatureRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const;
+	void getBrightnessRawRange(unsigned int* min, unsigned int* max) const;
+	void getGammaRawRange(unsigned int* min, unsigned int* max) const;
+	void getGainRawRange(unsigned int* min, unsigned int* max) const;
+	void getExposureRawRange(unsigned int* min, unsigned int* max) const;
+	void getShutterRawRange(unsigned int* min, unsigned int* max) const;
+	void getFeatureRawRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const;
+	
+	// abs value ranges
+	void getBrightnessAbsRange(float* min, float* max) const;
+	void getGammaAbsRange(float* min, float* max) const;
+	void getGainAbsRange(float* min, float* max) const;
+	void getExposureAbsRange(float* min, float* max) const;
+	void getShutterAbsRange(float* min, float* max) const;
+	void getFeatureAbsRange(dc1394feature_t feature, float* min, float* max) const;
 	
 	void printFeatures() const;
 	

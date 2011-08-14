@@ -281,7 +281,7 @@ void Camera::setShutter(float shutter) {setFeature(DC1394_FEATURE_SHUTTER, shutt
 void Camera::setFeature(dc1394feature_t feature, float value) {
 	if(camera) {
 		unsigned int min, max;
-		getFeatureRange(feature, &min, &max);
+		getFeatureRawRange(feature, &min, &max);
 		setFeatureRaw(feature, value * (max - min) + min);
 	} else {
 		ofLogWarning() << "Can't set feature until camera is connected.";
@@ -317,10 +317,6 @@ void Camera::setFeatureRaw(dc1394feature_t feature, unsigned int value) {
 		dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
 		dc1394_feature_set_absolute_control(camera, feature, DC1394_OFF);
 		dc1394_feature_set_value(camera, feature, value);
-		
-		unsigned int result;
-		dc1394_feature_get_value(camera, feature, &result);
-		cout << "set " << makeString(feature) << " to " << value << " -> " << result << endl;
 	} else {
 		ofLogWarning() << "Can't set feature until camera is connected.";
 	}
@@ -335,7 +331,7 @@ float Camera::getShutter() const {return getFeature(DC1394_FEATURE_SHUTTER);}
 float Camera::getFeature(dc1394feature_t feature) const {
 	unsigned int value = getFeature(feature);
 	unsigned int min, max;
-	getFeatureRange(feature, &min, &max);
+	getFeatureRawRange(feature, &min, &max);
 	return ((float) value - min) / (max - min);
 }
 
@@ -369,14 +365,26 @@ unsigned int Camera::getFeatureRaw(dc1394feature_t feature) const {
 }
 
 // raw value ranges
-void Camera::getBrightnessRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_BRIGHTNESS, min, max);}
-void Camera::getGammaRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_GAMMA, min, max);}
-void Camera::getGainRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_GAIN, min, max);}
-void Camera::getExposureRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_EXPOSURE, min, max);}
-void Camera::getShutterRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_SHUTTER, min, max);}
-void Camera::getFeatureRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const {
+void Camera::getBrightnessRawRange(unsigned int* min, unsigned int* max) const {getFeatureRawRange(DC1394_FEATURE_BRIGHTNESS, min, max);}
+void Camera::getGammaRawRange(unsigned int* min, unsigned int* max) const {getFeatureRawRange(DC1394_FEATURE_GAMMA, min, max);}
+void Camera::getGainRawRange(unsigned int* min, unsigned int* max) const {getFeatureRawRange(DC1394_FEATURE_GAIN, min, max);}
+void Camera::getExposureRawRange(unsigned int* min, unsigned int* max) const {getFeatureRawRange(DC1394_FEATURE_EXPOSURE, min, max);}
+void Camera::getShutterRawRange(unsigned int* min, unsigned int* max) const {getFeatureRawRange(DC1394_FEATURE_SHUTTER, min, max);}
+void Camera::getFeatureRawRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const {
 	if(camera) {
 		dc1394_feature_get_boundaries(camera, feature, min, max);
+	}
+}
+
+// abs value ranges
+void Camera::getBrightnessAbsRange(float* min, float* max) const {getFeatureAbsRange(DC1394_FEATURE_BRIGHTNESS, min, max);}
+void Camera::getGammaAbsRange(float* min, float* max) const {getFeatureAbsRange(DC1394_FEATURE_GAMMA, min, max);}
+void Camera::getGainAbsRange(float* min, float* max) const {getFeatureAbsRange(DC1394_FEATURE_GAIN, min, max);}
+void Camera::getExposureAbsRange(float* min, float* max) const {getFeatureAbsRange(DC1394_FEATURE_EXPOSURE, min, max);}
+void Camera::getShutterAbsRange(float* min, float* max) const {getFeatureAbsRange(DC1394_FEATURE_SHUTTER, min, max);}
+void Camera::getFeatureAbsRange(dc1394feature_t feature, float* min, float* max) const {
+	if(camera) {
+		dc1394_feature_get_absolute_boundaries(camera, feature, min, max);
 	}
 }
 
