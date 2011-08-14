@@ -40,6 +40,10 @@ void Camera::setBlocking(bool blocking) {
 	capturePolicy = blocking ? DC1394_CAPTURE_POLICY_WAIT : DC1394_CAPTURE_POLICY_POLL;
 }
 
+bool Camera::getBlocking() const {
+	return capturePolicy == DC1394_CAPTURE_POLICY_WAIT;
+}
+
 void Camera::startLibdcContext() {
 	if(libdcCameras == 0) {
 		ofLog(OF_LOG_VERBOSE, "Creating libdc1394 context with dc1394_new().");
@@ -427,13 +431,14 @@ bool Camera::grabStill(ofImage& img) {
 bool Camera::grabVideo(ofImage& img, bool dropFrames) {
 	if(camera) {
 		setTransmit(true);
-		if(dropFrames) {
+		if(!getBlocking() && dropFrames) {
 			bool remaining;
 			int i = 0;
 			do {
 				remaining = grabFrame(img);
-				if(!remaining && i == 0)
+				if(!remaining && i == 0) {
 					return false;
+				}
 				i++;
 			} while (remaining);
 			return true;

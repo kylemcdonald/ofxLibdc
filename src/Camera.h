@@ -23,6 +23,11 @@ public:
 	void setBlocking(bool blocking);
 	void setBayerMode(dc1394color_filter_t bayerMode); 
 	
+	ofImageType getImageType() const;
+	bool getBlocking() const;
+	unsigned int getWidth() const;
+	unsigned int getHeight() const;
+	
 	virtual bool setup(int cameraNumber = 0);
 	virtual bool setup(string cameraGuid);
 	virtual ~Camera();
@@ -101,10 +106,6 @@ public:
 	bool grabVideo(ofImage& img, bool dropFrames = true);
 	
 	void flushBuffer();
-		
-	unsigned int getWidth() const;
-	unsigned int getHeight() const;
-	ofImageType getImageType() const;
 	
 	dc1394camera_t* getLibdcCamera();
 	bool ready() const;
