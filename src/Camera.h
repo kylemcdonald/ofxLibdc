@@ -27,21 +27,57 @@ public:
 	virtual bool setup(string cameraGuid);
 	virtual ~Camera();
 	
-	// post-setup settings
-	void setBrightness(unsigned int brightness);
-	void setGamma(unsigned int gamma);
-	void setGain(unsigned int gain);
-	void setExposure(unsigned int exposure);
-	void setShutter(unsigned int shutter);
-	void setFeature(dc1394feature_t feature, unsigned int value);
+	// post-setup settings	
 	
-	void setBrightnessNorm(float brightness);
-	void setGammaNorm(float gamma);
-	void setGainNorm(float gain);
-	void setExposureNorm(float exposure);
-	void setShutterNorm(float shutter);
-	void setFeatureNorm(dc1394feature_t feature, float value);
+	// normalized values
+	void setBrightness(float brightness);
+	void setGamma(float gamma);
+	void setGain(float gain);
+	void setExposure(float exposure);
+	void setShutter(float shutter);
+	void setFeature(dc1394feature_t feature, float value);
 	
+	// absolute values
+	void setBrightnessAbs(float brightness);
+	void setGammaAbs(float gamma);
+	void setGainAbs(float gain);
+	void setExposureAbs(float exposure);
+	void setShutterAbs(float shutter);
+	void setFeatureAbs(dc1394feature_t feature, float value);
+	
+	// raw values
+	void setBrightnessRaw(unsigned int brightness);
+	void setGammaRaw(unsigned int gamma);
+	void setGainRaw(unsigned int gain);
+	void setExposureRaw(unsigned int exposure);
+	void setShutterRaw(unsigned int shutter);
+	void setFeatureRaw(dc1394feature_t feature, unsigned int value);
+	
+	// normalized values
+	float getBrightness() const;
+	float getGamma() const;
+	float getGain() const;
+	float getExposure() const;
+	float getShutter() const;
+	float getFeature(dc1394feature_t feature) const;
+	
+	// absolute values
+	float getBrightnessAbs() const;
+	float getGammaAbs() const;
+	float getGainAbs() const;
+	float getExposureAbs() const;
+	float getShutterAbs() const;
+	float getFeatureAbs(dc1394feature_t feature) const;
+	
+	// raw values
+	unsigned int getBrightnessRaw() const;
+	unsigned int getGammaRaw() const;
+	unsigned int getGainRaw() const;
+	unsigned int getExposureRaw() const;
+	unsigned int getShutterRaw() const;
+	unsigned int getFeatureRaw(dc1394feature_t feature) const;
+	
+	// raw value ranges
 	void getBrightnessRange(unsigned int* min, unsigned int* max) const;
 	void getGammaRange(unsigned int* min, unsigned int* max) const;
 	void getGainRange(unsigned int* min, unsigned int* max) const;
@@ -49,24 +85,11 @@ public:
 	void getShutterRange(unsigned int* min, unsigned int* max) const;
 	void getFeatureRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const;
 	
-	unsigned int getBrightness();
-	unsigned int getGamma();
-	unsigned int getGain();
-	unsigned int getExposure();
-	unsigned int getShutter();
-	unsigned int getFeature(dc1394feature_t feature);
+	void printFeatures() const;
 	
-	float getBrightnessNorm();
-	float getGammaNorm();
-	float getGainNorm();
-	float getExposureNorm();
-	float getShutterNorm();
-	float getFeatureNorm(dc1394feature_t feature);
+	// image grabbing
 	
-	float getShutterAbs() const;
-	float getFeatureAbs(dc1394feature_t feature) const;
-	
-	void grabStill(ofImage& img);
+	bool grabStill(ofImage& img);
 	bool grabVideo(ofImage& img, bool dropFrames = true);
 	
 	void flushBuffer();
@@ -74,7 +97,6 @@ public:
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
 	ofImageType getImageType() const;
-	void printFeatures() const;
 	
 	dc1394camera_t* getLibdcCamera();
 	bool ready() const;

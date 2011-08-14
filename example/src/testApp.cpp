@@ -1,6 +1,8 @@
 #include "testApp.h"
 
 void testApp::setup() {
+	ofSetVerticalSync(true);
+
 	// If you want to set any non-default parameters like size, format7, blocking
 	// capture, etc., you can do it here before setup. They'll be applied to the
 	// camera during setup().
@@ -11,6 +13,9 @@ void testApp::setup() {
 	
 	// After setup it's still possible to change a lot of parameters. If you want
 	// to change a pre-setup parameter, the camera will auto-restart
+	
+	// Set the window size to the camera size.
+	ofSetWindowShape(camera.getWidth(), camera.getHeight());
 }
 
 void testApp::update() {

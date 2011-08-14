@@ -6,18 +6,18 @@ dc1394_t* Camera::libdcContext = NULL;
 int Camera::libdcCameras = 0;
 
 Camera::Camera() :
-		camera(NULL),
-		imageType(OF_IMAGE_GRAYSCALE),
-		useFormat7(false),
-		use1394b(false),
-		width(640),
-		height(480),
-		left(0),
-		top(0),
-		useBayer(false),
-		bayerMode(DC1394_COLOR_FILTER_RGGB),
-		format7Mode(0),
-		capturePolicy(DC1394_CAPTURE_POLICY_POLL) {
+camera(NULL),
+imageType(OF_IMAGE_GRAYSCALE),
+useFormat7(false),
+use1394b(false),
+width(640),
+height(480),
+left(0),
+top(0),
+useBayer(false),
+bayerMode(DC1394_COLOR_FILTER_RGGB),
+format7Mode(0),
+capturePolicy(DC1394_CAPTURE_POLICY_POLL) {
 	startLibdcContext();
 }
 
@@ -138,25 +138,22 @@ bool Camera::initCamera(uint64_t cameraGuid) {
 	// create camera struct
 	camera = dc1394_camera_new(libdcContext, cameraGuid);
 	if (!camera) {
-		stringstream error;
-		error << "Failed to initialize camera with GUID " << hex << cameraGuid;
-		ofLog(OF_LOG_ERROR, error.str());
+		ofLogError() << "Failed to initialize camera with GUID " << hex << cameraGuid;
 		return false;
 	} else {
-		stringstream msg;
-		msg << "Using camera with GUID " << hex << camera->guid;
-		ofLog(OF_LOG_VERBOSE, msg.str());
+		ofLogVerbose() << "Using camera with GUID " << hex << camera->guid;
 	}
 	
-	#ifdef TARGET_OSX
+#ifdef TARGET_OSX
 	dc1394_iso_release_bandwidth(camera, INT_MAX);
-	for (int channel = 0; channel < 64; channel++)
+	for (int channel = 0; channel < 64; channel++) {
 		dc1394_iso_release_channel(camera, channel);
-	#endif
+	}
+#endif
 	
-	#ifdef TARGET_LINUX
+#ifdef TARGET_LINUX
 	dc1394_reset_bus(camera);
-	#endif
+#endif
 	
 	return true;
 }
@@ -164,7 +161,7 @@ bool Camera::initCamera(uint64_t cameraGuid) {
 bool Camera::applySettings() {
 	if(camera)
 		dc1394_capture_stop(camera);
-		
+	
 	if(use1394b) {
 		// assumes you want to run your 1394b camera at 800 Mbps
 		dc1394_video_set_operation_mode(camera, DC1394_OPERATION_MODE_1394B);
@@ -173,15 +170,19 @@ bool Camera::applySettings() {
 		dc1394_video_set_operation_mode(camera, DC1394_OPERATION_MODE_LEGACY);
 		dc1394_video_set_iso_speed(camera, DC1394_ISO_SPEED_400);
 	}
-		
+	
 	dc1394framerate_t framerate;
 	if(useFormat7) {
 		videoMode = (dc1394video_mode_t) ((int) DC1394_VIDEO_MODE_FORMAT7_0 + format7Mode);
 		unsigned int maxWidth, maxHeight;
 		dc1394_format7_get_max_image_size(camera, videoMode, &maxWidth, &maxHeight);
-		stringstream msg;
-		msg << "Maximum size for current Format7 mode is " << maxWidth << "x" << maxHeight;
-		ofLog(OF_LOG_VERBOSE, msg.str());
+		ofLogVerbose() << "Maximum size for current Format7 mode is " << maxWidth << "x" << maxHeight;
+		quantizePosition();
+		quantizeSize();
+		dc1394_format7_set_roi(camera, videoMode, getLibdcType(imageType), DC1394_USE_MAX_AVAIL, left, top, width, height);
+		unsigned int curWidth, curHeight;
+		dc1394_format7_get_image_size(camera, videoMode, &curWidth, &curHeight);
+		ofLogVerbose() <<  "Using mode: " <<  width << "x" << height;
 	} else {
 		dc1394video_modes_t video_modes;
 		dc1394_video_get_supported_modes(camera, &video_modes);
@@ -199,13 +200,11 @@ bool Camera::applySettings() {
 				dc1394video_mode_t curMode = video_modes.modes[i];
 				unsigned int curWidth, curHeight;
 				dc1394_get_image_size_from_video_mode(camera, curMode, &curWidth, &curHeight);
-
+				
 				dc1394color_coding_t curCoding;
 				dc1394_get_color_coding_from_video_mode(camera, curMode, &curCoding);
-
-				ofLog(OF_LOG_VERBOSE,
-					  "Camera mode " + ofToString(i) + ": " + makeString(curCoding) + " " +
-					  ofToString((int) curWidth) + "x" + ofToString((int) curHeight));
+				
+				ofLogVerbose() << "Camera mode " << i << ": " << makeString(curCoding) << " " << curWidth + "x" << curHeight;
 				if(curCoding == targetCoding) {
 					float curDistance = ofDist(curWidth, curHeight, width, height);
 					if(!found || curDistance < bestDistance) {
@@ -234,23 +233,14 @@ bool Camera::applySettings() {
 		dc1394framerates_t framerates;
 		dc1394_video_get_supported_framerates(camera, videoMode, &framerates);
 		framerate = framerates.framerates[framerates.num - 1];
-	}
-	
-	if(useFormat7) {
-		quantizePosition();
-		quantizeSize();
-		dc1394_format7_set_roi(camera, videoMode, getLibdcType(imageType), DC1394_USE_MAX_AVAIL, left, top, width, height);
-		unsigned int curWidth, curHeight;
-		dc1394_format7_get_image_size(camera, videoMode, &curWidth, &curHeight);
-		ofLog(OF_LOG_VERBOSE, "Using mode: " + ofToString((int) width) + "x" + ofToString((int) height));
-	} else {
+		
 		dc1394_video_set_framerate(camera, framerate);
-		ofLog(OF_LOG_VERBOSE, "Using mode: " + ofToString((int) width) + "x" + ofToString((int) height) + " " + makeString(framerate) + "fps");
+		ofLogVerbose() <<  "Using mode: " <<  width << "x" << height << makeString(framerate) << "fps";
 	}
 	
 	// contrary to the libdc1394 format7 demo, this should go after the roi setting
 	dc1394_video_set_mode(camera, videoMode);
-		
+	
 	dc1394_capture_setup(camera, OFXLIBDC_BUFFER_SIZE, DC1394_CAPTURE_FLAGS_DEFAULT);
 	
 	return true;
@@ -282,111 +272,95 @@ void Camera::printFeatures() const {
 	}
 }
 
-void Camera::setBrightness(unsigned int brightness) {
-	setFeature(DC1394_FEATURE_BRIGHTNESS, brightness);
-}
-
-void Camera::setGamma(unsigned int gamma) {
-	setFeature(DC1394_FEATURE_GAMMA, gamma);
-}
-
-void Camera::setGain(unsigned int gain) {
-	setFeature(DC1394_FEATURE_GAIN, gain);
-}
-
-void Camera::setExposure(unsigned int exposure) {
-	setFeature(DC1394_FEATURE_EXPOSURE, exposure);
-}
-
-void Camera::setShutter(unsigned int shutter) {
-	setFeature(DC1394_FEATURE_SHUTTER, shutter);
-}
-
-void Camera::setBrightnessNorm(float brightness) {
-	setFeatureNorm(DC1394_FEATURE_BRIGHTNESS, brightness);
-}
-
-void Camera::setGammaNorm(float gamma) {
-	setFeatureNorm(DC1394_FEATURE_GAMMA, gamma);
-}
-
-void Camera::setGainNorm(float gain) {
-	setFeatureNorm(DC1394_FEATURE_GAIN, gain);
-}
-
-void Camera::setExposureNorm(float exposure) {
-	setFeatureNorm(DC1394_FEATURE_EXPOSURE, exposure);
-}
-
-void Camera::setShutterNorm(float shutter) {
-	setFeatureNorm(DC1394_FEATURE_SHUTTER, shutter);
-}
-
-inline void Camera::setFeature(dc1394feature_t feature, unsigned int value) {
-	if(camera) {
-		dc1394_feature_set_power(camera, feature, DC1394_ON);
-		dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
-		dc1394_feature_set_value(camera, feature, value);
-	}
-}
-
-void Camera::setFeatureNorm(dc1394feature_t feature, float value) {
+// normalized values
+void Camera::setBrightness(float brightness) {setFeature(DC1394_FEATURE_BRIGHTNESS, brightness);}
+void Camera::setGamma(float gamma) {setFeature(DC1394_FEATURE_GAMMA, gamma);}
+void Camera::setGain(float gain) {setFeature(DC1394_FEATURE_GAIN, gain);}
+void Camera::setExposure(float exposure) {setFeature(DC1394_FEATURE_EXPOSURE, exposure);}
+void Camera::setShutter(float shutter) {setFeature(DC1394_FEATURE_SHUTTER, shutter);}
+void Camera::setFeature(dc1394feature_t feature, float value) {
 	if(camera) {
 		unsigned int min, max;
 		getFeatureRange(feature, &min, &max);
+		setFeatureRaw(feature, value * (max - min) + min);
+	} else {
+		ofLogWarning() << "Can't set feature until camera is connected.";
+	}
+}
+
+// absolute values
+void Camera::setBrightnessAbs(float brightness) {setFeatureAbs(DC1394_FEATURE_BRIGHTNESS, brightness);}
+void Camera::setGammaAbs(float gamma) {setFeatureAbs(DC1394_FEATURE_GAMMA, gamma);}
+void Camera::setGainAbs(float gain) {setFeatureAbs(DC1394_FEATURE_GAIN, gain);}
+void Camera::setExposureAbs(float exposure) {setFeatureAbs(DC1394_FEATURE_EXPOSURE, exposure);}
+void Camera::setShutterAbs(float shutter) {setFeatureAbs(DC1394_FEATURE_SHUTTER, shutter);}
+void Camera::setFeatureAbs(dc1394feature_t feature, float value) {
+	if(camera) {
 		dc1394_feature_set_power(camera, feature, DC1394_ON);
 		dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
-		dc1394_feature_set_value(camera, feature, value * (max - min) + min);
+		dc1394_feature_set_absolute_control(camera, feature, DC1394_ON);
+		dc1394_feature_set_absolute_value(camera, feature, value);
+	} else {
+		ofLogWarning() << "Can't set feature until camera is connected.";
 	}
 }
 
-void Camera::getBrightnessRange(unsigned int* min, unsigned int* max) const {
-	getFeatureRange(DC1394_FEATURE_BRIGHTNESS, min, max);
-}
-
-void Camera::getGammaRange(unsigned int* min, unsigned int* max) const {
-	getFeatureRange(DC1394_FEATURE_GAMMA, min, max);
-}
-
-void Camera::getGainRange(unsigned int* min, unsigned int* max) const {
-	getFeatureRange(DC1394_FEATURE_GAIN, min, max);
-}
-
-void Camera::getExposureRange(unsigned int* min, unsigned int* max) const {
-	getFeatureRange(DC1394_FEATURE_EXPOSURE, min, max);
-}
-
-void Camera::getShutterRange(unsigned int* min, unsigned int* max) const {
-	getFeatureRange(DC1394_FEATURE_SHUTTER, min, max);
-}
-
-void Camera::getFeatureRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const {
+// raw values
+void Camera::setBrightnessRaw(unsigned int brightness) {setFeatureRaw(DC1394_FEATURE_BRIGHTNESS, brightness);}
+void Camera::setGammaRaw(unsigned int gamma) {setFeatureRaw(DC1394_FEATURE_GAMMA, gamma);}
+void Camera::setGainRaw(unsigned int gain) {setFeatureRaw(DC1394_FEATURE_GAIN, gain);}
+void Camera::setExposureRaw(unsigned int exposure) {setFeatureRaw(DC1394_FEATURE_EXPOSURE, exposure);}
+void Camera::setShutterRaw(unsigned int shutter) {setFeatureRaw(DC1394_FEATURE_SHUTTER, shutter);}
+void Camera::setFeatureRaw(dc1394feature_t feature, unsigned int value) {
 	if(camera) {
-		dc1394_feature_get_boundaries(camera, feature, min, max);
+		dc1394_feature_set_power(camera, feature, DC1394_ON);
+		dc1394_feature_set_mode(camera, feature, DC1394_FEATURE_MODE_MANUAL);
+		dc1394_feature_set_absolute_control(camera, feature, DC1394_OFF);
+		dc1394_feature_set_value(camera, feature, value);
+		
+		unsigned int result;
+		dc1394_feature_get_value(camera, feature, &result);
+		cout << "set " << makeString(feature) << " to " << value << " -> " << result << endl;
+	} else {
+		ofLogWarning() << "Can't set feature until camera is connected.";
 	}
 }
 
-unsigned int Camera::getBrightness() {
-	return getFeature(DC1394_FEATURE_BRIGHTNESS);
+// normalized values
+float Camera::getBrightness() const {return getFeature(DC1394_FEATURE_BRIGHTNESS);}
+float Camera::getGamma() const {return getFeature(DC1394_FEATURE_GAMMA);}
+float Camera::getGain() const {return getFeature(DC1394_FEATURE_GAIN);}
+float Camera::getExposure() const {return getFeature(DC1394_FEATURE_EXPOSURE);}
+float Camera::getShutter() const {return getFeature(DC1394_FEATURE_SHUTTER);}
+float Camera::getFeature(dc1394feature_t feature) const {
+	unsigned int value = getFeature(feature);
+	unsigned int min, max;
+	getFeatureRange(feature, &min, &max);
+	return ((float) value - min) / (max - min);
 }
 
-unsigned int Camera::getGamma() {
-	return getFeature(DC1394_FEATURE_GAMMA);
+
+// absolute values
+float Camera::getBrightnessAbs() const {return getFeatureAbs(DC1394_FEATURE_BRIGHTNESS);}
+float Camera::getGammaAbs() const {return getFeatureAbs(DC1394_FEATURE_GAMMA);}
+float Camera::getGainAbs() const {return getFeatureAbs(DC1394_FEATURE_GAIN);}
+float Camera::getExposureAbs() const {return getFeatureAbs(DC1394_FEATURE_EXPOSURE);}
+float Camera::getShutterAbs() const {return getFeatureAbs(DC1394_FEATURE_SHUTTER);}
+float Camera::getFeatureAbs(dc1394feature_t feature) const {
+	float value = 0;
+	if(camera) {
+		dc1394_feature_get_absolute_value(camera, feature, &value);
+	}
+	return value;
 }
 
-unsigned int Camera::getGain() {
-	return getFeature(DC1394_FEATURE_GAIN);
-}
-
-unsigned int Camera::getExposure() {
-	return getFeature(DC1394_FEATURE_EXPOSURE);
-}
-
-unsigned int Camera::getShutter() {
-	return getFeature(DC1394_FEATURE_SHUTTER);
-}
-
-unsigned int Camera::getFeature(dc1394feature_t feature) {
+// raw values
+unsigned int Camera::getBrightnessRaw() const {return getFeatureRaw(DC1394_FEATURE_BRIGHTNESS);}
+unsigned int Camera::getGammaRaw() const {return getFeatureRaw(DC1394_FEATURE_GAMMA);}
+unsigned int Camera::getGainRaw() const {return getFeatureRaw(DC1394_FEATURE_GAIN);}
+unsigned int Camera::getExposureRaw() const {return getFeatureRaw(DC1394_FEATURE_EXPOSURE);}
+unsigned int Camera::getShutterRaw() const {return getFeatureRaw(DC1394_FEATURE_SHUTTER);}
+unsigned int Camera::getFeatureRaw(dc1394feature_t feature) const {
 	unsigned int value = 0;
 	if(camera) {
 		dc1394_feature_get_value(camera, feature, &value);
@@ -394,43 +368,16 @@ unsigned int Camera::getFeature(dc1394feature_t feature) {
 	return value;
 }
 
-float Camera::getBrightnessNorm() {
-	return getFeatureNorm(DC1394_FEATURE_BRIGHTNESS);
-}
-
-float Camera::getGammaNorm() {
-	return getFeatureNorm(DC1394_FEATURE_GAMMA);
-}
-
-float Camera::getGainNorm() {
-	return getFeatureNorm(DC1394_FEATURE_GAIN);
-}
-
-float Camera::getExposureNorm() {
-	return getFeatureNorm(DC1394_FEATURE_EXPOSURE);
-}
-
-float Camera::getShutterNorm() {
-	return getFeatureNorm(DC1394_FEATURE_SHUTTER);
-}
-
-float Camera::getFeatureNorm(dc1394feature_t feature) {
-	unsigned int value = getFeature(feature);
-	unsigned int min, max;
-	getFeatureRange(feature, &min, &max);
-	return ((float) value - min) / (max - min);
-}
-
-float Camera::getShutterAbs() const {
-	return getFeatureAbs(DC1394_FEATURE_SHUTTER);
-}
-
-float Camera::getFeatureAbs(dc1394feature_t feature) const {
-	float value = 0;
+// raw value ranges
+void Camera::getBrightnessRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_BRIGHTNESS, min, max);}
+void Camera::getGammaRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_GAMMA, min, max);}
+void Camera::getGainRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_GAIN, min, max);}
+void Camera::getExposureRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_EXPOSURE, min, max);}
+void Camera::getShutterRange(unsigned int* min, unsigned int* max) const {getFeatureRange(DC1394_FEATURE_SHUTTER, min, max);}
+void Camera::getFeatureRange(dc1394feature_t feature, unsigned int* min, unsigned int* max) const {
 	if(camera) {
-		dc1394_feature_get_absolute_value(camera, feature, &value);
+		dc1394_feature_get_boundaries(camera, feature, min, max);
 	}
-	return value;
 }
 
 unsigned int Camera::getWidth() const {
@@ -459,13 +406,14 @@ void Camera::setTransmit(bool transmit) {
 	}
 }
 
-void Camera::grabStill(ofImage& img) {
+bool Camera::grabStill(ofImage& img) {
 	if(camera) {
 		setTransmit(false);
 		flushBuffer();
 		dc1394_video_set_one_shot(camera, DC1394_ON);
-		grabFrame(img);
+		return grabFrame(img);
 	}
+	return false;
 }
 
 bool Camera::grabVideo(ofImage& img, bool dropFrames) {
@@ -504,10 +452,9 @@ bool Camera::grabFrame(ofImage& img) {
 				memcpy(dst, src, width * height);
 			} else if(imageType == OF_IMAGE_COLOR) {
 				unsigned int bits = width * height * img.getPixelsRef().getBitsPerPixel();
-				
-				if( useBayer ){
+				if(useBayer) {
 					dc1394_bayer_decoding_8bit(src, dst, width, height, bayerMode, DC1394_BAYER_METHOD_BILINEAR);
-				}else{
+				} else {
 					dc1394_convert_to_RGB8(src, dst, width, height, 0, getLibdcType(imageType), bits);
 				}
 			}
@@ -552,24 +499,49 @@ bool Camera::ready() const {
 
 string Camera::makeString(int name) {
 	switch(name) {
-		enumCase(DC1394_COLOR_CODING_MONO8)
-		enumCase(DC1394_COLOR_CODING_YUV411)
-		enumCase(DC1394_COLOR_CODING_YUV422)
-		enumCase(DC1394_COLOR_CODING_RGB8)
-		enumCase(DC1394_COLOR_CODING_MONO16)
-		enumCase(DC1394_COLOR_CODING_RGB16)
-		enumCase(DC1394_COLOR_CODING_MONO16S)
-		enumCase(DC1394_COLOR_CODING_RGB16S)
-		enumCase(DC1394_COLOR_CODING_RAW8)
-		enumCase(DC1394_COLOR_CODING_RAW16)
-		enumCase(DC1394_FRAMERATE_1_875)
-		enumCase(DC1394_FRAMERATE_3_75)
-		enumCase(DC1394_FRAMERATE_7_5)
-		enumCase(DC1394_FRAMERATE_15)
-		enumCase(DC1394_FRAMERATE_30)
-		enumCase(DC1394_FRAMERATE_60)
-		enumCase(DC1394_FRAMERATE_120)
-		enumCase(DC1394_FRAMERATE_240)
+			enumCase(DC1394_COLOR_CODING_MONO8)
+			enumCase(DC1394_COLOR_CODING_YUV411)
+			enumCase(DC1394_COLOR_CODING_YUV422)
+			enumCase(DC1394_COLOR_CODING_RGB8)
+			enumCase(DC1394_COLOR_CODING_MONO16)
+			enumCase(DC1394_COLOR_CODING_RGB16)
+			enumCase(DC1394_COLOR_CODING_MONO16S)
+			enumCase(DC1394_COLOR_CODING_RGB16S)
+			enumCase(DC1394_COLOR_CODING_RAW8)
+			enumCase(DC1394_COLOR_CODING_RAW16)
+			enumCase(DC1394_FRAMERATE_1_875)
+			enumCase(DC1394_FRAMERATE_3_75)
+			enumCase(DC1394_FRAMERATE_7_5)
+			enumCase(DC1394_FRAMERATE_15)
+			enumCase(DC1394_FRAMERATE_30)
+			enumCase(DC1394_FRAMERATE_60)
+			enumCase(DC1394_FRAMERATE_120)
+			enumCase(DC1394_FRAMERATE_240)
+			
+			enumCase(DC1394_FEATURE_BRIGHTNESS)
+			enumCase(DC1394_FEATURE_EXPOSURE)
+			enumCase(DC1394_FEATURE_SHARPNESS)
+			enumCase(DC1394_FEATURE_WHITE_BALANCE)
+			enumCase(DC1394_FEATURE_HUE)
+			enumCase(DC1394_FEATURE_SATURATION)
+			enumCase(DC1394_FEATURE_GAMMA)
+			enumCase(DC1394_FEATURE_SHUTTER)
+			enumCase(DC1394_FEATURE_GAIN)
+			enumCase(DC1394_FEATURE_IRIS)
+			enumCase(DC1394_FEATURE_FOCUS)
+			enumCase(DC1394_FEATURE_TEMPERATURE)
+			enumCase(DC1394_FEATURE_TRIGGER)
+			enumCase(DC1394_FEATURE_TRIGGER_DELAY)
+			enumCase(DC1394_FEATURE_WHITE_SHADING)
+			enumCase(DC1394_FEATURE_FRAME_RATE)
+			enumCase(DC1394_FEATURE_ZOOM)
+			enumCase(DC1394_FEATURE_PAN)
+			enumCase(DC1394_FEATURE_TILT)
+			enumCase(DC1394_FEATURE_OPTICAL_FILTER)
+			enumCase(DC1394_FEATURE_CAPTURE_SIZE)
+			enumCase(DC1394_FEATURE_CAPTURE_QUALITY)
+			
+			default: return "[unrecognized]";
 	}
 }
 
