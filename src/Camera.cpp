@@ -337,10 +337,13 @@ float Camera::getGain() const {return getFeature(DC1394_FEATURE_GAIN);}
 float Camera::getExposure() const {return getFeature(DC1394_FEATURE_EXPOSURE);}
 float Camera::getShutter() const {return getFeature(DC1394_FEATURE_SHUTTER);}
 float Camera::getFeature(dc1394feature_t feature) const {
-	unsigned int value = getFeature(feature);
-	unsigned int min, max;
-	getFeatureRawRange(feature, &min, &max);
-	return ((float) value - min) / (max - min);
+	float value = 0;
+	if(camera) {
+		unsigned int min, max, raw = getFeatureRaw(feature);
+		getFeatureRawRange(feature, &min, &max);
+		value = ((float) raw - min) / (max - min);
+	}
+	return value;
 }
 
 
