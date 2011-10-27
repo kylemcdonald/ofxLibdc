@@ -21,12 +21,14 @@ public:
 	void setFormat7(bool useFormat7, int mode = 0);
 	void set1394b(bool use1394b);
 	void setBlocking(bool blocking);
-	void setBayerMode(dc1394color_filter_t bayerMode); 
+	void setBayerMode(dc1394color_filter_t bayerMode);
+	void setFrameRate(float frameRate);
 	
 	ofImageType getImageType() const;
 	bool getBlocking() const;
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
+	float getFrameRate() const;
 	
 	virtual bool setup(int cameraNumber = 0);
 	virtual bool setup(string cameraGuid);
@@ -124,6 +126,7 @@ protected:
 	dc1394capture_policy_t capturePolicy;
 	unsigned int width, height, left, top;
 	ofImageType imageType;
+	float frameRate;
 	
 	bool useBayer;
 	dc1394color_filter_t bayerMode;
@@ -141,8 +144,10 @@ protected:
 	void quantizePosition();
 	
 	void setTransmit(bool transmit);
+	unsigned int getSourceDepth() const;
 	
-	string makeString(int name);
+	static string makeString(int name);
+	static float makeFloat(int name);
 };
 
 }
