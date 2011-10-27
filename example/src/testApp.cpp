@@ -31,7 +31,7 @@ void testApp::update() {
 
 void testApp::draw() {
 	// If the camera isn't ready, the curFrame will be empty.
-	if(camera.ready()) {
+	if(camera.isReady()) {
 		// Camera doesn't draw itself, curFrame does.
 		curFrame.draw(0, 0);
 	}

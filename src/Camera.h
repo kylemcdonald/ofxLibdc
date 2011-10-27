@@ -47,7 +47,7 @@ public:
 	void setGammaAbs(float gamma);
 	void setGainAbs(float gain);
 	void setExposureAbs(float exposure);
-	void setShutterAbs(float shutter);
+	void setShutterAbs(float shutter); // in seconds
 	void setFeatureAbs(dc1394feature_t feature, float value);
 	
 	// raw values
@@ -71,7 +71,7 @@ public:
 	float getGammaAbs() const;
 	float getGainAbs() const;
 	float getExposureAbs() const;
-	float getShutterAbs() const;
+	float getShutterAbs() const; // in seconds
 	float getFeatureAbs(dc1394feature_t feature) const;
 	
 	// raw values
@@ -95,7 +95,7 @@ public:
 	void getGammaAbsRange(float* min, float* max) const;
 	void getGainAbsRange(float* min, float* max) const;
 	void getExposureAbsRange(float* min, float* max) const;
-	void getShutterAbsRange(float* min, float* max) const;
+	void getShutterAbsRange(float* min, float* max) const; // in seconds
 	void getFeatureAbsRange(dc1394feature_t feature, float* min, float* max) const;
 	
 	void printFeatures() const;
@@ -108,7 +108,7 @@ public:
 	void flushBuffer();
 	
 	dc1394camera_t* getLibdcCamera();
-	bool ready() const;
+	bool isReady() const;
 
 protected:
 	static dc1394_t* libdcContext;
@@ -131,6 +131,7 @@ protected:
 	bool useFormat7;
 	int format7Mode;
 	bool use1394b;
+	bool ready;
 	
 	bool grabFrame(ofImage& img);
 	bool initCamera(uint64_t cameraGuid);

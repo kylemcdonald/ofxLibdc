@@ -17,7 +17,8 @@ top(0),
 useBayer(false),
 bayerMode(DC1394_COLOR_FILTER_RGGB),
 format7Mode(0),
-capturePolicy(DC1394_CAPTURE_POLICY_POLL) {
+capturePolicy(DC1394_CAPTURE_POLICY_POLL),
+ready(false) {
 	startLibdcContext();
 }
 
@@ -236,6 +237,9 @@ bool Camera::applySettings() {
 		// todo: make this settable
 		dc1394framerates_t framerates;
 		dc1394_video_get_supported_framerates(camera, videoMode, &framerates);
+		for(int i = 0; i < framerates.num; i++) {
+			ofLogVerbose() << "Available framerate: " << makeString(framerates.framerates[i]);
+		}
 		framerate = framerates.framerates[framerates.num - 1];
 		
 		dc1394_video_set_framerate(camera, framerate);
@@ -472,6 +476,7 @@ bool Camera::grabFrame(ofImage& img) {
 				}
 			}
 			dc1394_capture_enqueue(camera, frame);
+			ready = true;
 			return true;
 		} else {
 			return false;
@@ -496,8 +501,8 @@ dc1394camera_t* Camera::getLibdcCamera() {
 	return camera;
 }
 
-bool Camera::ready() const {
-	return camera != NULL;
+bool Camera::isReady() const {
+	return ready;
 }
 
 /*
