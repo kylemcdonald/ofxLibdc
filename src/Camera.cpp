@@ -201,7 +201,9 @@ namespace ofxLibdc {
 				packetSize = (width * height * depth + denominator - 1) / denominator;
 				ofLogWarning() << "The camera may not run at exactly " << frameRate << " fps";
 			}
-			dc1394_format7_set_roi(camera, videoMode, getLibdcType(imageType), packetSize, left, top, width, height);
+            
+            // MEMO SAYS: this line needs to be commented out for Bumblebee2 to work
+//			dc1394_format7_set_roi(camera, videoMode, getLibdcType(imageType), packetSize, left, top, width, height);
 			unsigned int curWidth, curHeight;
 			dc1394_format7_get_image_size(camera, videoMode, &curWidth, &curHeight);
 			ofLogVerbose() <<  "Using mode: " <<  width << "x" << height;
@@ -519,6 +521,40 @@ namespace ofxLibdc {
 		}
 	}
 	
+    
+    bool Camera::grabStereo(unsigned char* img1, unsigned char* img2) {
+        if(camera) {
+            setTransmit(true);
+
+            dc1394video_frame_t *frame;
+            dc1394_capture_dequeue(camera, capturePolicy, &frame);
+            if(frame != NULL) {
+                int bytesPerImage = width * height;
+                
+                uint8_t deinterlaced[bytesPerImage*2];
+                
+                
+                dc1394_deinterlace_stereo(frame->image, deinterlaced, width*2, height);
+                
+//                img1.setFromPixels(deinterlaced, width, height, OF_IMAGE_GRAYSCALE);
+//                img2.setFromPixels(deinterlaced+(width*height), width, height, OF_IMAGE_GRAYSCALE);
+                
+                memcpy(img1, deinterlaced, bytesPerImage);
+                memcpy(img2, deinterlaced + bytesPerImage, bytesPerImage);
+
+                dc1394_capture_enqueue(camera, frame);
+                ready = true;
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        
+    }
+    
+    
 	void Camera::flushBuffer() {
 		if(camera) {
 			dc1394video_frame_t *frame;

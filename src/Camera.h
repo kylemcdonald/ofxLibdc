@@ -106,6 +106,11 @@ public:
 	
 	bool grabStill(ofImage& img);
 	bool grabVideo(ofImage& img, bool dropFrames = true);
+    
+    // tested with PointGrey Bumblebee2
+    // making these accept unsigned char* (must be pre-allocated), instead of ofImage, so you can pass ofxCvImage directly if need be
+    // more efficient than copying into ofImage, and then into ofxCvImage
+    bool grabStereo(unsigned char* img1, unsigned char* img2);
 	
 	void flushBuffer();
 	
