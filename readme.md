@@ -31,5 +31,3 @@ Because there is no separate capture thread, there is no overhead from copying i
 The only parameter you may pass to setup() is the camera number or a camera GUID string. Any other camera parameters are handled by setter functions.
 
 ofxLibdc can dynamically change a number of parameters. setPosition() can be used to change the ROI position without restarting the camera. Other changes can be made, but will cause slight delays. Format 7 can be switched on and off, or between modes, 1394b can be switched on and off, and the ROI can be resized.
-
-ofxLibdc is currently only compatible with grayscale cameras.
