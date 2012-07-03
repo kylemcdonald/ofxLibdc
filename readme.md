@@ -31,3 +31,5 @@ Because there is no separate capture thread, there is no overhead from copying i
 The only parameter you may pass to setup() is the camera number or a camera GUID string. Any other camera parameters are handled by setter functions.
 
 ofxLibdc can dynamically change a number of parameters. setPosition() can be used to change the ROI position without restarting the camera. Other changes can be made, but will cause slight delays. Format 7 can be switched on and off, or between modes, 1394b can be switched on and off, and the ROI can be resized.
+
+For an example of interfacing to the color USB Firefly MV on OSX, see [this example project](http://phd.lewissykes.info/webdisk/FireflyMV-USB/) from Lewis Sykes and Elliot Woods.
