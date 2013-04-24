@@ -162,7 +162,7 @@
 				67152FCD1727792E00C8946B /* osx */,
 			);
 			name = libs;
-			path = ../libs;
+			path = ../../../addons/ofxLibdc/libs;
 			sourceTree = "<group>";
 		};
 		67152FCD1727792E00C8946B /* osx */ = {
@@ -243,7 +243,7 @@
 				67152FED1727792E00C8946B /* PointGrey.h */,
 			);
 			name = src;
-			path = ../src;
+			path = ../../../addons/ofxLibdc/src;
 			sourceTree = "<group>";
 		};
 		BB4B014C10F69532006C3DED /* addons */ = {
@@ -586,7 +586,7 @@
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../libs/osx/lib\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = ofxLibdcExampleDebug;
-				SDKROOT = macosx10.7;
+				SDKROOT = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -675,7 +675,7 @@
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/../libs/osx/lib\"";
 				PREBINDING = NO;
 				PRODUCT_NAME = ofxLibdcExample;
-				SDKROOT = macosx10.7;
+				SDKROOT = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
