@@ -222,7 +222,7 @@ namespace ofxLibdc {
 					dc1394_get_image_size_from_video_mode(camera, curMode, &curWidth, &curHeight);
 					dc1394color_coding_t curCoding;
 					dc1394_get_color_coding_from_video_mode(camera, curMode, &curCoding);
-					ofLogVerbose() << "Camera mode " << i << ": " << makeString(curCoding) << " " << curWidth + "x" << curHeight;
+					ofLogVerbose() << "Camera mode " << i << ": " << makeString(curCoding) << " " << curWidth << "x" << curHeight;
 					if(curCoding == targetCoding) {
 						float curDistance = ofDist(curWidth, curHeight, width, height);
 						if(!found || curDistance < bestDistance) {
