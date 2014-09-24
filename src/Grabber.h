@@ -32,12 +32,18 @@ public:
 	void draw(float x, float y, float w, float h);
 	float getWidth();
 	float getHeight();
-	bool isFrameNew();
+    bool isFrameNew() const;
 	void close();
-	ofPixels& getPixelsRef();
+    ofPixels& getPixelsRef();
+    const ofPixels& getPixelsRef() const;
+    
+    bool isInitialized() const {return true;}
+    bool setPixelFormat(ofPixelFormat pixelFormat) {}
+    ofPixelFormat getPixelFormat() const {return OF_PIXELS_UNKNOWN;}
+    
 protected:
 	ofImage buffer;
-	bool newFrame;
+	mutable bool newFrame;
 };
 
 }

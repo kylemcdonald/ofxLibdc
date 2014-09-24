@@ -46,7 +46,7 @@ float Grabber::getHeight() {
 	return Camera::getHeight();
 }
 
-bool Grabber::isFrameNew() {
+bool Grabber::isFrameNew() const {
 	if(newFrame) {
 		newFrame = false;
 		return true;
@@ -60,6 +60,10 @@ void Grabber::close() {
 
 ofPixels& Grabber::getPixelsRef() {
 	return buffer.getPixelsRef();
+}
+    
+const ofPixels& Grabber::getPixelsRef() const {
+    return buffer.getPixelsRef();
 }
 
 }
