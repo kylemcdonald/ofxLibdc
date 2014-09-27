@@ -2,6 +2,8 @@
 
 #include "ofMain.h"
 #include "dc1394.h"
+#include <stdlib.h>
+#include <string.h>
 
 // This sets the number of images in the DMA buffer,
 // where libdc stores images until you grab them.
@@ -11,7 +13,7 @@ namespace ofxLibdc {
 
 class Camera {
 public:
-	Camera();
+	Camera(bool isStereoCamera = false);
 	static int getCameraCount();
 	
 	// pre-setup settings
@@ -29,6 +31,10 @@ public:
 	unsigned int getWidth() const;
 	unsigned int getHeight() const;
 	float getFrameRate() const;
+    
+    // stereo camera settings
+    void setStereoCamera(bool isStereo);
+    bool isStereoCamera() const;
 	
 	virtual bool setup(int cameraNumber = 0);
 	virtual bool setup(string cameraGuid);
@@ -105,7 +111,9 @@ public:
 	// image grabbing
 	
 	bool grabStill(ofImage& img);
+    bool grabStill(ofImage& img1, ofImage& img2);
 	bool grabVideo(ofImage& img, bool dropFrames = true);
+    bool grabVideo(ofImage& img1, ofImage& img2, bool dropFrames = true);
 	
 	void flushBuffer();
 	
@@ -117,6 +125,11 @@ protected:
 	static int libdcCameras;
 	static void startLibdcContext();
 	static void stopLibdcContext();
+    
+    bool isStereo;
+    dc1394stereo_method_t stereoMethod;
+    dc1394color_coding_t colorCoding;
+    dc1394bayer_method_t bayerMethod;
 	
 	static ofImageType getOfImageType(dc1394color_coding_t imageType);
 	static dc1394color_coding_t getLibdcType(ofImageType imageType);
@@ -137,6 +150,7 @@ protected:
 	bool ready;
 	
 	bool grabFrame(ofImage& img);
+    bool grabFrame(ofImage& img1, ofImage& img2);
 	bool initCamera(uint64_t cameraGuid);
 	bool applySettings();
 	
