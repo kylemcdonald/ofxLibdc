@@ -5,7 +5,7 @@ namespace ofxLibdc {
 	dc1394_t* Camera::libdcContext = NULL;
 	int Camera::libdcCameras = 0;
 	
-	Camera::Camera() :
+	Camera::Camera(bool isStereoCamera) :
 	camera(NULL),
 	imageType(OF_IMAGE_GRAYSCALE),
 	useFormat7(false),
@@ -21,6 +21,7 @@ namespace ofxLibdc {
 	ready(false),
 	frameRate(0) {
 		startLibdcContext();
+        setStereoCamera(isStereoCamera);
 	}
 	
 	Camera::~Camera() {
@@ -51,6 +52,15 @@ namespace ofxLibdc {
 			dc1394_free(libdcContext);
 		}
 	}
+    
+    void Camera::setStereoCamera(bool isStereo) {
+        stereoMethod = DC1394_STEREO_METHOD_INTERLACED;
+        this->isStereo = isStereo;
+    }
+    
+    bool Camera::isStereoCamera() const {
+        return this->isStereo;
+    }
 	
 	ofImageType Camera::getOfImageType(dc1394color_coding_t imageType) {
 		switch(imageType) {
@@ -183,95 +193,118 @@ namespace ofxLibdc {
 			dc1394_video_set_operation_mode(camera, DC1394_OPERATION_MODE_LEGACY);
 			dc1394_video_set_iso_speed(camera, DC1394_ISO_SPEED_400);
 		}
-		
-		if(useFormat7) {
-			videoMode = (dc1394video_mode_t) ((int) DC1394_VIDEO_MODE_FORMAT7_0 + format7Mode);
-			unsigned int maxWidth, maxHeight;
-			dc1394_format7_get_max_image_size(camera, videoMode, &maxWidth, &maxHeight);
-			ofLogVerbose() << "Maximum size for current Format7 mode is " << maxWidth << "x" << maxHeight;
-			quantizePosition();
-			quantizeSize();
-			int packetSize = DC1394_USE_MAX_AVAIL;
-			if(frameRate > 0) {
-				// http://damien.douxchamps.net/ieee1394/libdc1394/v2.x/faq/#How_can_I_work_out_the_packet_size_for_a_wanted_frame_rate
-				float busPeriod = use1394b ? 6.25e-5 : 125e-5; // e-5 is microseconds
-				int numPackets = (int) (1.0 / (busPeriod * frameRate) + 0.5);
-				int denominator = numPackets * 8;
-				int depth = getSourceDepth();
-				packetSize = (width * height * depth + denominator - 1) / denominator;
-				ofLogWarning() << "The camera may not run at exactly " << frameRate << " fps";
-			}
-			dc1394_format7_set_roi(camera, videoMode, getLibdcType(imageType), packetSize, left, top, width, height);
-			unsigned int curWidth, curHeight;
-			dc1394_format7_get_image_size(camera, videoMode, &curWidth, &curHeight);
-			ofLogVerbose() <<  "Using mode: " <<  width << "x" << height;
-		} else {
-			dc1394video_modes_t video_modes;
-			dc1394_video_get_supported_modes(camera, &video_modes);
-			dc1394color_coding_t targetCoding = getLibdcType(imageType);
-			if(useBayer){
-				targetCoding = DC1394_COLOR_CODING_MONO8;
-			}
-			float bestDistance = 0;
-			dc1394video_mode_t bestMode;
-			bool found = false;
-			for(int i = 0; i < video_modes.num; i++) {
-				if (!dc1394_is_video_mode_scalable(video_modes.modes[i])) {
-					dc1394video_mode_t curMode = video_modes.modes[i];
-					unsigned int curWidth, curHeight;
-					dc1394_get_image_size_from_video_mode(camera, curMode, &curWidth, &curHeight);
-					dc1394color_coding_t curCoding;
-					dc1394_get_color_coding_from_video_mode(camera, curMode, &curCoding);
-					ofLogVerbose() << "Camera mode " << i << ": " << makeString(curCoding) << " " << curWidth << "x" << curHeight;
-					if(curCoding == targetCoding) {
-						float curDistance = ofDist(curWidth, curHeight, width, height);
-						if(!found || curDistance < bestDistance) {
-							bestMode = curMode;
-							bestDistance = curDistance;
-						}
-						found = true;
-					}
-				}
-			}
-			
-			if(!found) {
-				ofLog(OF_LOG_ERROR, "Camera does not support target color coding.");
-				camera = NULL;
-				return false;
-			} else {
-				unsigned int bestWidth, bestHeight;
-				dc1394_get_image_size_from_video_mode(camera, bestMode, &bestWidth, &bestHeight);
-				width = bestWidth;
-				height = bestHeight;
-				videoMode = bestMode;
-			}
-			
-			dc1394framerates_t frameRates;
-			dc1394framerate_t selectedFrameRate;
-			dc1394_video_get_supported_framerates(camera, videoMode, &frameRates);
-			for(int i = 0; i < frameRates.num; i++) {
-				ofLogVerbose() << "Available framerate: " << makeString(frameRates.framerates[i]);
-			}
-			if(frameRate == 0) {
-				selectedFrameRate = frameRates.framerates[frameRates.num - 1];
-			} else {
-				float bestDistance;
-				for(int i = 0; i < frameRates.num; i++) {
-					float curDistance = abs(frameRate - makeFloat(frameRates.framerates[i]));
-					if(i == 0 || curDistance < bestDistance) {
-						bestDistance = curDistance;
-						selectedFrameRate = frameRates.framerates[i];
-					}
-				}
-				if(bestDistance != 0) {
-					ofLogWarning() << "Using framerate " << makeFloat(selectedFrameRate) << " instead of " << frameRate;
-					frameRate = makeFloat(selectedFrameRate);
-				}
-			}
-			dc1394_video_set_framerate(camera, selectedFrameRate);
-			ofLogVerbose() <<  "Using mode: " <<  width << "x" << height << makeString(selectedFrameRate) << "fps";
-		}
-		
+        
+        if(isStereoCamera()) {
+            useFormat7 = true;
+            format7Mode = 3;
+            videoMode = DC1394_VIDEO_MODE_FORMAT7_3;
+            setBayerMode(DC1394_COLOR_FILTER_BGGR);
+            bayerMethod = DC1394_BAYER_METHOD_BILINEAR;
+            colorCoding = DC1394_COLOR_CODING_RAW16;
+            
+            setPosition(0, 0);
+            unsigned int maxWidth, maxHeight;
+            dc1394_format7_get_max_image_size(camera, videoMode, &maxWidth, &maxHeight);
+            ofLogVerbose() << "Maximum size for current Format7 mode is " << maxWidth << "x" << maxHeight;
+            quantizeSize();
+            
+            dc1394_format7_set_image_size(camera, videoMode, width, height); // set image size
+            unsigned int curWidth, curHeight;
+            dc1394_format7_get_image_size(camera, videoMode, &curWidth, &curHeight);
+            ofLogVerbose() <<  "Using mode: " <<  width << "x" << height;
+            
+            dc1394_format7_set_color_coding(camera, videoMode, colorCoding);
+            
+        } else {
+            if(useFormat7) {
+                videoMode = (dc1394video_mode_t) ((int) DC1394_VIDEO_MODE_FORMAT7_0 + format7Mode);
+                unsigned int maxWidth, maxHeight;
+                dc1394_format7_get_max_image_size(camera, videoMode, &maxWidth, &maxHeight);
+                ofLogVerbose() << "Maximum size for current Format7 mode is " << maxWidth << "x" << maxHeight;
+                quantizePosition();
+                quantizeSize();
+                int packetSize = DC1394_USE_MAX_AVAIL;
+                if(frameRate > 0) {
+                    // http://damien.douxchamps.net/ieee1394/libdc1394/v2.x/faq/#How_can_I_work_out_the_packet_size_for_a_wanted_frame_rate
+                    float busPeriod = use1394b ? 6.25e-5 : 125e-5; // e-5 is microseconds
+                    int numPackets = (int) (1.0 / (busPeriod * frameRate) + 0.5);
+                    int denominator = numPackets * 8;
+                    int depth = getSourceDepth();
+                    packetSize = (width * height * depth + denominator - 1) / denominator;
+                    ofLogWarning() << "The camera may not run at exactly " << frameRate << " fps";
+                }
+                dc1394_format7_set_roi(camera, videoMode, getLibdcType(imageType), packetSize, left, top, width, height);
+                unsigned int curWidth, curHeight;
+                dc1394_format7_get_image_size(camera, videoMode, &curWidth, &curHeight);
+                ofLogVerbose() <<  "Using mode: " <<  width << "x" << height;
+            } else {
+                dc1394video_modes_t video_modes;
+                dc1394_video_get_supported_modes(camera, &video_modes);
+                dc1394color_coding_t targetCoding = getLibdcType(imageType);
+                if(useBayer){
+                    targetCoding = DC1394_COLOR_CODING_MONO8;
+                }
+                float bestDistance = 0;
+                dc1394video_mode_t bestMode;
+                bool found = false;
+                for(int i = 0; i < video_modes.num; i++) {
+                    if (!dc1394_is_video_mode_scalable(video_modes.modes[i])) {
+                        dc1394video_mode_t curMode = video_modes.modes[i];
+                        unsigned int curWidth, curHeight;
+                        dc1394_get_image_size_from_video_mode(camera, curMode, &curWidth, &curHeight);
+                        dc1394color_coding_t curCoding;
+                        dc1394_get_color_coding_from_video_mode(camera, curMode, &curCoding);
+                        ofLogVerbose() << "Camera mode " << i << ": " << makeString(curCoding) << " " << curWidth << "x" << curHeight;
+                        if(curCoding == targetCoding) {
+                            float curDistance = ofDist(curWidth, curHeight, width, height);
+                            if(!found || curDistance < bestDistance) {
+                                bestMode = curMode;
+                                bestDistance = curDistance;
+                            }
+                            found = true;
+                        }
+                    }
+                }
+                
+                if(!found) {
+                    ofLog(OF_LOG_ERROR, "Camera does not support target color coding.");
+                    camera = NULL;
+                    return false;
+                } else {
+                    unsigned int bestWidth, bestHeight;
+                    dc1394_get_image_size_from_video_mode(camera, bestMode, &bestWidth, &bestHeight);
+                    width = bestWidth;
+                    height = bestHeight;
+                    videoMode = bestMode;
+                }
+                
+                dc1394framerates_t frameRates;
+                dc1394framerate_t selectedFrameRate;
+                dc1394_video_get_supported_framerates(camera, videoMode, &frameRates);
+                for(int i = 0; i < frameRates.num; i++) {
+                    ofLogVerbose() << "Available framerate: " << makeString(frameRates.framerates[i]);
+                }
+                if(frameRate == 0) {
+                    selectedFrameRate = frameRates.framerates[frameRates.num - 1];
+                } else {
+                    float bestDistance;
+                    for(int i = 0; i < frameRates.num; i++) {
+                        float curDistance = abs(frameRate - makeFloat(frameRates.framerates[i]));
+                        if(i == 0 || curDistance < bestDistance) {
+                            bestDistance = curDistance;
+                            selectedFrameRate = frameRates.framerates[i];
+                        }
+                    }
+                    if(bestDistance != 0) {
+                        ofLogWarning() << "Using framerate " << makeFloat(selectedFrameRate) << " instead of " << frameRate;
+                        frameRate = makeFloat(selectedFrameRate);
+                    }
+                }
+                dc1394_video_set_framerate(camera, selectedFrameRate);
+                ofLogVerbose() <<  "Using mode: " <<  width << "x" << height << makeString(selectedFrameRate) << "fps";
+            }
+        }
+				
 		// contrary to the libdc1394 format7 demo, this should go after the roi setting
 		dc1394_video_set_mode(camera, videoMode);
 		
@@ -464,6 +497,42 @@ namespace ofxLibdc {
 		}
 		return false;
 	}
+    
+    bool Camera::grabStill(ofImage& img1, ofImage& img2) {
+        if(camera) {
+            if(!isStereoCamera())
+                return grabStill(img1);
+			setTransmit(false);
+			flushBuffer();
+			dc1394_video_set_one_shot(camera, DC1394_ON);
+            return grabFrame(img1, img2);
+		}
+		return false;
+    }
+    
+    bool Camera::grabVideo(ofImage& img1, ofImage& img2, bool dropFrames) {
+        if(camera) {
+            if(!isStereoCamera())
+                return grabVideo(img1);
+            setTransmit(true);
+            if(!getBlocking() && dropFrames) {
+				bool remaining;
+				int i = 0;
+				do {
+                    remaining = grabFrame(img1, img2);
+					if(!remaining && i == 0) {
+						return false;
+					}
+					i++;
+				} while (remaining);
+				return true;
+			} else {
+				return grabFrame(img1, img2);
+			}
+        } else {
+            return false;
+        }
+    }
 	
 	bool Camera::grabVideo(ofImage& img, bool dropFrames) {
 		if(camera) {
@@ -518,6 +587,60 @@ namespace ofxLibdc {
 			return false;
 		}
 	}
+    
+    bool Camera::grabFrame(ofImage& img1, ofImage& img2) {
+        if(camera) {
+            dc1394video_frame_t *frame;
+            dc1394_capture_dequeue(camera, capturePolicy, &frame);
+            if(frame != NULL) {
+                if(img1.getWidth() != width || img2.getHeight() != height) {
+					img1.allocate(width, height, imageType);
+				}
+                if(img2.getWidth() != width || img2.getHeight() != height) {
+					img2.allocate(width, height, imageType);
+				}
+            
+                // stereo extract
+                dc1394video_frame_t frame1 = *frame;
+                frame1.allocated_image_bytes = frame->total_bytes;
+                frame1.image = (unsigned char*)malloc(frame1.allocated_image_bytes);
+                frame1.color_coding = DC1394_COLOR_CODING_RAW8;
+                if(dc1394_deinterlace_stereo_frames(frame, &frame1, stereoMethod) != DC1394_SUCCESS) {
+                    free(frame1.image);
+                    dc1394_capture_enqueue(camera, frame);
+                    return false;
+                }
+                
+                // bayer conversation
+                dc1394video_frame_t frame2;
+                frame2.allocated_image_bytes = (frame1.size[0]*frame1.size[1]*3*sizeof(unsigned char));
+                frame2.image = (unsigned char*)malloc(frame2.allocated_image_bytes);
+                frame2.color_coding = DC1394_COLOR_CODING_RGB8;
+                frame1.color_filter = bayerMode;
+                if(dc1394_debayer_frames(&frame1, &frame2, bayerMethod) != DC1394_SUCCESS) {
+                    free(frame2.image);
+                    dc1394_capture_enqueue(camera, frame);
+                    return false;
+                }
+                
+                // buffer copy
+                unsigned char* buffer = reinterpret_cast<unsigned char*>(frame2.image);
+                unsigned int size = width * height * 3;
+                memcpy(img1.getPixels(), buffer, size);
+                memcpy(img2.getPixels(), buffer+size, size);
+
+                dc1394_capture_enqueue(camera, frame);
+                free(buffer);
+                free(frame1.image);
+                ready = true;
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 	
 	void Camera::flushBuffer() {
 		if(camera) {
