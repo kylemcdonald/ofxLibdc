@@ -24,7 +24,7 @@ public:
 	Grabber();
 	ofTexture& getTextureReference();
 	void setUseTexture(bool useTexture);
-	unsigned char* getPixels();
+//	unsigned char* getPixels();
 	ofImage& getBuffer();
 	void update();
 	void grabFrame();
@@ -32,14 +32,14 @@ public:
 	void draw(float x, float y, float w, float h);
 	float getWidth();
 	float getHeight();
-    bool isFrameNew() const;
-	void close();
-    ofPixels& getPixelsRef();
-    const ofPixels& getPixelsRef() const;
+    bool isFrameNew() const override;
+	void close() override;
+    ofPixels& getPixels() override;
+    const ofPixels& getPixels() const override;
     
-    bool isInitialized() const {return true;}
-    bool setPixelFormat(ofPixelFormat pixelFormat) {}
-    ofPixelFormat getPixelFormat() const {return OF_PIXELS_UNKNOWN;}
+    bool isInitialized() const override {return true;}
+    bool setPixelFormat(ofPixelFormat pixelFormat) override {}
+    ofPixelFormat getPixelFormat() const override {return OF_PIXELS_UNKNOWN;}
     
 protected:
 	ofImage buffer;
