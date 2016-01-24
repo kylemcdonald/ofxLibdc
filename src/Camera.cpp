@@ -566,14 +566,14 @@ namespace ofxLibdc {
 					img.allocate(width, height, imageType);
 				}
 				unsigned char* src = frame->image;
-				unsigned char* dst = img.getPixels();
+				unsigned char* dst = img.getPixels().getData();
 				if(imageType == OF_IMAGE_GRAYSCALE) {
 					memcpy(dst, src, width * height);
 				} else if(imageType == OF_IMAGE_COLOR) {
 					if(useBayer) {
 						dc1394_bayer_decoding_8bit(src, dst, width, height, bayerMode, DC1394_BAYER_METHOD_BILINEAR);
 					} else {
-						unsigned int bits = width * height * img.getPixelsRef().getBitsPerPixel();
+						unsigned int bits = width * height * img.getPixels().getBitsPerPixel();
 						dc1394_convert_to_RGB8(src, dst, width, height, 0, getLibdcType(imageType), bits);
 					}
 				}
@@ -626,8 +626,8 @@ namespace ofxLibdc {
                 // buffer copy
                 unsigned char* buffer = reinterpret_cast<unsigned char*>(frame2.image);
                 unsigned int size = width * height * 3;
-                memcpy(img1.getPixels(), buffer, size);
-                memcpy(img2.getPixels(), buffer+size, size);
+                memcpy(img1.getPixels().getData(), buffer, size);
+                memcpy(img2.getPixels().getData(), buffer+size, size);
 
                 dc1394_capture_enqueue(camera, frame);
                 free(buffer);
