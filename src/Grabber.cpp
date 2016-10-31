@@ -28,6 +28,7 @@ void Grabber::update() {
 
 void Grabber::grabFrame() {
 	newFrame = grabVideo(buffer);
+    if (newFrame) buffer.update();
 }
 
 void Grabber::draw(float x, float y) {
